@@ -1,0 +1,11 @@
+{
+  "name": "thullo-backend",
+  "version": "1.0.0",
+  "description": "thullo web app backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "Bhanu Teja",
+  "license": "MIT"
+}
