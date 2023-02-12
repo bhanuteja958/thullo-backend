@@ -1,4 +1,4 @@
-const { DataTypes, DATE} = require("sequelize");
+const { DataTypes} = require("sequelize");
 const { getDBConnection } = require("../services/database");
 
 const sequelize = getDBConnection();
@@ -16,28 +16,21 @@ const User = sequelize.define('Users', {
     },
     last_name: {
         type: DataTypes.STRING(50),
-        allowNull: false
+        allowNull: true
     },
     email: {
         type: DataTypes.STRING(100),
-        allowNull: false  
+        allowNull: false,
+        unique: true  
     },
     password: {
         type:  DataTypes.STRING,
         allowNull: false
     },
-    created_on: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: sequelize.literal('CURRENT_TIMESTAMP')
-    },
-    modified_on: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: sequelize.literal('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')    
-    }
 }, {
-    timestamps: false,
+    timestamps: true,
+    createdAt: 'created_on',
+    updatedAt: 'modified_on',
     freezeTableName: true
 })
 
