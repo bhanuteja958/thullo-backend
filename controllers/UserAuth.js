@@ -1,5 +1,6 @@
 const { REGISTER_MANDATORY_PARAMS } = require('../common/constants');
-const { checkForMandatoryParams, generateAPIResponse } = require('../common/Helper');
+const { checkForMandatoryParams, generateAPIResponse } = require('../common/helper');
+const RegisterSchema = require('../requestschema/RegisterSchema');
 const { checkIfUserWithEmailExists, createUser } = require('../services/auth');
 const { hashPassword } = require('../services/hashing');
 
@@ -13,6 +14,14 @@ const registerUser = async (userDetails) => {
         response = generateAPIResponse(mandatoryParamsCheckResult.message);
         return [400, response];
     } 
+
+    const {error} = RegisterSchema.validate(userDetails);
+    console.log(error);
+
+    if(error) {
+        response = generateAPIResponse(error.details[0].message);
+        return [400, response];
+    }
 
     const { email, password} = userDetails;
 

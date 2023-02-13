@@ -1,5 +1,5 @@
 const express = require('express');
-const { generateAPIResponse } = require('../common/Helper');
+const { generateAPIResponse } = require('../common/helper');
 const { registerUser } = require('../controllers/UserAuth');
 const router = express.Router();
 
