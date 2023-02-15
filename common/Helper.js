@@ -1,18 +1,57 @@
-const checkForMandatoryParams = (mandatoryParams, paramsFromRequest) => {
+const checkMandatoryParams = (mandatoryParams, paramsFromRequest) => {
     const missingMandatoryParams = []
 
     mandatoryParams.forEach((mandatoryParam) => {
-        let mandatoryParamValue = paramsFromRequest[mandatoryParam]
+        let mandatoryParamValue = paramsFromRequest[mandatoryParam];
         mandatoryParamValue = typeof(mandatoryParamValue) === 'string' ? mandatoryParamValue.trim() : mandatoryParamValue
         if(mandatoryParamValue !== 0 && !mandatoryParamValue) {
             missingMandatoryParams.push(mandatoryParam);
         }
     })
 
+    if(missingMandatoryParams.length > 0) {
+        return {
+            errorMessage:  `Missing mandatory parameters (${missingMandatoryParams.concat(',')})`,
+            status: 400
+        }
+    }
+
     return {
-        message: missingMandatoryParams.length > 0 ?
-        `Missing mandatory parameters (${missingMandatoryParams.concat(',')})` : '',
-        isMandatoryParamsExist: (missingMandatoryParams.length === 0)
+        errorMessage: ''
+    }
+}
+
+const checkPayloadSchema = (schema, payload) => {
+    const {error} = schema.validate(payload);
+
+    if(error) {
+        return {
+            errorMessage: error.details[0].message,
+            status: 400,
+        }
+    }
+
+    return {
+        errorMessage: ''
+    }
+}
+
+const checkMandatoryParamsAndPayloadSchema = (mandatoryParams, schema, payload) => {
+    const mandatoryParamsCheckResult = checkMandatoryParams(mandatoryParams, payload);
+
+    if(mandatoryParamsCheckResult.errorMessage) {
+        return mandatoryParamsCheckResult;
+    }
+
+    const payloadSchemaCheckResult = checkPayloadSchema(schema, payload);
+
+    if(payloadSchemaCheckResult.errorMessage) {
+        return payloadSchemaCheckResult;
+    }
+
+    return {
+        errorMessage: '',
+        status: 200
     }
 }
 
@@ -26,6 +65,6 @@ const generateAPIResponse = (message,success=false, data=[]) => {
 
  
 module.exports = {
-    checkForMandatoryParams,
-    generateAPIResponse
+    checkMandatoryParamsAndPayloadSchema,
+    generateAPIResponse 
 }

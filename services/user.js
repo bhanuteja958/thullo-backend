@@ -14,13 +14,13 @@ const checkIfUserWithEmailExists = async (email) => {
 
         return {
             isEmailAlreadyExists: user ? true : false,
-            message: user ? 'A user with the given email already exists' : ''
+            message: user ? 'A user with the given email already exists' : 'Invalid Email/Password'
         }
     } catch(error) {
         console.log('Unable to query DB: ',error);
         return {
-            isEmailAlreadyExists: true,
-            message: 'Something went wrong',
+           status: 500,
+           errorMessage: 'Something went wrong',
         }
     }
     
@@ -35,14 +35,36 @@ const createUser = async (userDetails) => {
             email,
             password: hashedPassword 
         })
-        return user ? true : false
+        return user
     } catch (error) {
         console.log('Error while creating user: ', error);
-        return false
+        return {
+            errorMessage: 'Something went wrong',
+            status: 500
+        }
+    }
+}
+
+const getUser = async (email) => {
+    try{
+        const user = await User.findOne({
+            attributes: ['id','first_name', 'last_name'],
+            where: {
+                email
+            }
+        })
+        return user.dataValues
+    } catch(error) {
+        console.log('Error while fetching user details : ',error);
+        return {
+            errorMessage: 'something went wrong',
+            status: 500
+        }
     }
 }
 
 module.exports = {
     checkIfUserWithEmailExists,
-    createUser
+    createUser,
+    getUser
 }
