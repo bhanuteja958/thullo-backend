@@ -70,9 +70,35 @@ const getUserToken = async (email) => {
             }
         });
 
-        return userTokenResult.token
+        return userTokenResult.dataValues
     } catch(error) {
         console.log('Error while fetching user token : ',error);
+        return {
+            errorMessage: 'something went wrong',
+            status: 500
+        }
+    }
+}
+
+const checkUserToken =async (token) => {
+    try {
+        const userTokenResult = await User.findOne({
+            attributes:['token'],
+            where: {
+                token
+            }
+        });
+
+        if(!userTokenResult) {
+            return {
+                errorMessage: 'Not a valid token',
+                status: 400,
+            }
+        }
+
+        return userTokenResult.token
+    } catch(error) {
+        console.log('Error while checking user token : ',error);
         return {
             errorMessage: 'something went wrong',
             status: 500
@@ -84,5 +110,6 @@ module.exports = {
     checkIfUserWithEmailExists,
     createUser,
     getUser,
-    getUserToken
+    getUserToken,
+    checkUserToken
 }

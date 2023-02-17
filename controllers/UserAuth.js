@@ -2,7 +2,7 @@ const { REGISTER_MANDATORY_PARAMS, LOGIN_MANDATORY_PARAMNS } = require('../commo
 const {  generateAPIResponse, checkMandatoryParamsAndPayloadSchema, generateRandomString } = require('../common/helper');
 const { LoginSchema } = require('../requestschema/LoginSchema');
 const RegisterSchema = require('../requestschema/RegisterSchema');
-const { checkIfUserWithEmailExists, createUser, getUser, getUserToken } = require('../services/user');
+const { checkIfUserWithEmailExists, createUser, getUser, getUserToken, checkUserToken } = require('../services/user');
 const { hashPassword, comparePasswords } = require('../services/hashing');
 const { generateJWTToken, extractAndVerifyToken } = require('../services/jwttoken');
 const { sendVerifyEmail } = require('../services/mailing');
@@ -162,8 +162,32 @@ const sendVerificationEmail = async (bearerToken) => {
     }
 }
 
+const verifyUserToken = async (token) => {
+    let response = {}
+    try{
+        //token check
+        if(!token) {
+            response = generateAPIResponse('Not able to verify');
+            return [500, response];
+        }
+
+        const checkUserTokenResult = await checkUserToken(token);
+
+        if(checkUserTokenResult.errorMessage) {
+            response = generateAPIResponse(checkUserTokenResult.errorMessage);
+            return [checkUserTokenResult.status,response]; 
+        }
+
+        response = generateAPIResponse('Successfully verified email');
+        return [200, response];
+    } catch(error) {
+        console.log(error)
+    }
+}
+
 module.exports = {
     registerUser,
     loginUser,
-    sendVerificationEmail
+    sendVerificationEmail,
+    verifyUserToken
 }
