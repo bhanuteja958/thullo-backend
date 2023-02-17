@@ -1,10 +1,11 @@
 const { REGISTER_MANDATORY_PARAMS, LOGIN_MANDATORY_PARAMNS } = require('../common/constants');
-const {  generateAPIResponse, checkMandatoryParamsAndPayloadSchema } = require('../common/helper');
+const {  generateAPIResponse, checkMandatoryParamsAndPayloadSchema, generateRandomString } = require('../common/helper');
 const { LoginSchema } = require('../requestschema/LoginSchema');
 const RegisterSchema = require('../requestschema/RegisterSchema');
-const { checkIfUserWithEmailExists, createUser, getUser } = require('../services/user');
+const { checkIfUserWithEmailExists, createUser, getUser, getUserToken } = require('../services/user');
 const { hashPassword, comparePasswords } = require('../services/hashing');
-const { generateJWTToken } = require('../services/jwttoken');
+const { generateJWTToken, extractAndVerifyToken } = require('../services/jwttoken');
+const { sendVerifyEmail } = require('../services/mailing');
 
 const registerUser = async (userData) => {
     try {
@@ -41,6 +42,8 @@ const registerUser = async (userData) => {
         }
 
         userData.hashedPassword = hashedPasswordResult;
+
+        userData.token = generateRandomString();
 
         //creating user
         const userCreationResult = await createUser(userData);
@@ -99,6 +102,8 @@ const loginUser = async (loginData) => {
             return [userdetailsResult.status, response];
         }
 
+        userdetailsResult.email = email
+
         //generate jwt token
         const accessTokenGenerationResult = await generateJWTToken(userdetailsResult);
 
@@ -123,7 +128,42 @@ const loginUser = async (loginData) => {
     }
 }
 
+const sendVerificationEmail = async (bearerToken) => {
+    let response = {};
+    try {
+        //verify auth token
+        const verifyTokenResult = await extractAndVerifyToken(bearerToken);
+        
+        if(verifyTokenResult.errorMessage) {
+            response = generateAPIResponse(verifyTokenResult.errorMessage);
+            return [verifyTokenResult.status, response];
+        }
+
+        //fetch user token
+        const tokenResult = await getUserToken(verifyTokenResult.email);
+
+        if(tokenResult.errorMessage) {
+            response = generateAPIResponse(tokenResult.errorMessage);
+            return [tokenResult.status,response];
+        }
+
+        //send verification email
+        const sendVerifyEmailResult = await sendVerifyEmail(tokenResult, verifyTokenResult.email);
+
+        if(sendVerifyEmailResult.errorMessage) {
+            response = generateAPIResponse(sendVerifyEmailResult.errorMessage);
+            return [sendVerifyEmailResult.status,response];
+        }
+
+        return [200, generateAPIResponse('Verfication email successfully sent') ]
+
+    } catch(error) {
+        console.log(error)
+    }
+}
+
 module.exports = {
     registerUser,
-    loginUser
+    loginUser,
+    sendVerificationEmail
 }

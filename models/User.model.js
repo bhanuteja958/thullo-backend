@@ -27,6 +27,16 @@ const User = sequelize.define('Users', {
         type:  DataTypes.STRING,
         allowNull: false
     },
+    token: {
+        type: DataTypes.STRING(20),
+        allowNull: false,
+        unique: true
+    },
+    is_verified: {
+        type: DataTypes.TINYINT(1),
+        allowNull: false,
+        defaultValue: 0
+    }
 }, {
     timestamps: true,
     createdAt: 'created_on',

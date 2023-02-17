@@ -1,3 +1,5 @@
+const crypto = require('crypto');
+
 const checkMandatoryParams = (mandatoryParams, paramsFromRequest) => {
     const missingMandatoryParams = []
 
@@ -36,7 +38,7 @@ const checkPayloadSchema = (schema, payload) => {
     }
 }
 
-const checkMandatoryParamsAndPayloadSchema = (mandatoryParams, schema, payload) => {
+module.exports.checkMandatoryParamsAndPayloadSchema = (mandatoryParams, schema, payload) => {
     const mandatoryParamsCheckResult = checkMandatoryParams(mandatoryParams, payload);
 
     if(mandatoryParamsCheckResult.errorMessage) {
@@ -55,7 +57,7 @@ const checkMandatoryParamsAndPayloadSchema = (mandatoryParams, schema, payload) 
     }
 }
 
-const generateAPIResponse = (message,success=false, data=[]) => {
+module.exports.generateAPIResponse = (message,success=false, data=[]) => {
     return {
         success,
         message,
@@ -63,8 +65,7 @@ const generateAPIResponse = (message,success=false, data=[]) => {
     }
 }
 
- 
-module.exports = {
-    checkMandatoryParamsAndPayloadSchema,
-    generateAPIResponse 
+module.exports.generateRandomString = () => {
+    const randomstring = crypto.randomBytes(20).toString('hex');
+    return randomstring;
 }

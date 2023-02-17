@@ -1,6 +1,3 @@
-const { getDBConnection } = require("./database");
-
-const sequelize = getDBConnection();
 const { User } = require('../models/User.model');
 
 const checkIfUserWithEmailExists = async (email) => {
@@ -33,7 +30,8 @@ const createUser = async (userDetails) => {
             first_name,
             last_name,
             email,
-            password: hashedPassword 
+            password: hashedPassword,
+            token 
         })
         return user
     } catch (error) {
@@ -46,7 +44,7 @@ const createUser = async (userDetails) => {
 }
 
 const getUser = async (email) => {
-    try{
+    try {
         const user = await User.findOne({
             attributes: ['id','first_name', 'last_name'],
             where: {
@@ -63,8 +61,28 @@ const getUser = async (email) => {
     }
 }
 
+const getUserToken = async (email) => {
+    try {
+        const userTokenResult = await User.findOne({
+            attributes:['token'],
+            where: {
+                email
+            }
+        });
+
+        return userTokenResult.token
+    } catch(error) {
+        console.log('Error while fetching user token : ',error);
+        return {
+            errorMessage: 'something went wrong',
+            status: 500
+        }
+    }
+}
+
 module.exports = {
     checkIfUserWithEmailExists,
     createUser,
-    getUser
+    getUser,
+    getUserToken
 }
