@@ -13,15 +13,15 @@ const generateJWTToken = async (userData) => {
     }
 }
 
-const extractAndVerifyToken = async (bearerToken) => {
+const extractAndVerifyToken = (bearerToken) => {
     const notAuthorizedResponse = {
         errorMessage: 'Not Authorized',
         status: 401
     }
+
     if(!bearerToken) {
         return notAuthorizedResponse;
     }
-
     const bearerTokenParts = bearerToken.split(' ');
     if(!bearerTokenParts[1] || !bearerTokenParts[1].trim()){
         return notAuthorizedResponse;
@@ -30,7 +30,7 @@ const extractAndVerifyToken = async (bearerToken) => {
     const authToken = bearerTokenParts[1];
 
     try{
-        const decodedToken =  jwt.verify(authToken, process.env.ACCESS_TOKEN_SECRET);
+        const decodedToken = jwt.verify(authToken, process.env.ACCESS_TOKEN_SECRET);
         return decodedToken
     } catch(error) {
         console.log('Error while verifying access token:', error);

@@ -1,10 +1,10 @@
 const dotenv = require('dotenv');
-const { urlencoded } = require('express');
 dotenv.config()
 
 const express = require('express');
 const { FALLBACK_PORT } = require('./common/constants');
 const authRouter = require('./routes/UserAuth');
+const boardsRouter = require('./routes/Boards');
 const { connectToDB } = require('./services/database');
 
 const app = express();
@@ -13,6 +13,8 @@ const app = express();
 app.use(express.json());
 
 app.use('/api/user', authRouter);
+
+app.use('/api/board', boardsRouter);
 
 connectToDB().then(() => {
     const PORT = process.env.PORT || FALLBACK_PORT;

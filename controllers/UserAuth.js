@@ -1,5 +1,4 @@
-const { REGISTER_MANDATORY_PARAMS, LOGIN_MANDATORY_PARAMNS } = require('../common/constants');
-const {  generateAPIResponse, checkMandatoryParamsAndPayloadSchema, generateRandomString } = require('../common/helper');
+const {  generateAPIResponse, generateRandomString, checkPayloadSchema } = require('../common/helper');
 const { LoginSchema } = require('../requestschema/LoginSchema');
 const RegisterSchema = require('../requestschema/RegisterSchema');
 const { checkIfUserWithEmailExists, createUser, getUser, getUserToken, checkUserToken } = require('../services/user');
@@ -10,12 +9,13 @@ const { sendVerifyEmail } = require('../services/mailing');
 const registerUser = async (userData) => {
     try {
         let response = {}
-        // checking mandatory params and payload schema
-        const mandatoryParamsandPayloadSchemaCheckResult = checkMandatoryParamsAndPayloadSchema(REGISTER_MANDATORY_PARAMS, RegisterSchema, userData);
 
-        if(mandatoryParamsandPayloadSchemaCheckResult.errorMessage) {
-            response = generateAPIResponse(mandatoryParamsandPayloadSchemaCheckResult.errorMessage )
-            return [mandatoryParamsandPayloadSchemaCheckResult.status, response]
+        //check payload schema
+        const checkPayloadSchemaResult = checkPayloadSchema(RegisterSchema, userData);
+
+        if(checkPayloadSchemaResult.errorMessage) {
+            response = generateAPIResponse(checkPayloadSchemaResult.errorMessage);
+            return [checkPayloadSchemaResult.status, response]
         }
 
         const { email, password} = userData;
@@ -63,12 +63,12 @@ const registerUser = async (userData) => {
 const loginUser = async (loginData) => {
     try{
         let response = {}
-        // checking mandatory params and payload schema
-        const mandatoryParamsandPayloadSchemaCheckResult = checkMandatoryParamsAndPayloadSchema(LOGIN_MANDATORY_PARAMNS, LoginSchema, loginData);
+        //checking payload schema
+        const checkPayloadSchemaResult = checkPayloadSchema(LoginSchema, loginData);
 
-        if(mandatoryParamsandPayloadSchemaCheckResult.errorMessage) {
-            response = generateAPIResponse(mandatoryParamsandPayloadSchemaCheckResult.errorMessage )
-            return [mandatoryParamsandPayloadSchemaCheckResult.status, response]
+        if(checkPayloadSchemaResult.errorMessage) {
+            response = generateAPIResponse(checkPayloadSchemaResult.errorMessage);
+            return [checkPayloadSchemaResult.status, response]
         }
 
         const {email, password} = loginData
@@ -155,7 +155,7 @@ const sendVerificationEmail = async (bearerToken) => {
             return [sendVerifyEmailResult.status,response];
         }
 
-        return [200, generateAPIResponse('Verfication email successfully sent') ]
+        return [200, generateAPIResponse('Verfication email successfully sent', true) ]
 
     } catch(error) {
         console.log(error)
@@ -178,7 +178,7 @@ const verifyUserToken = async (token) => {
             return [checkUserTokenResult.status,response]; 
         }
 
-        response = generateAPIResponse('Successfully verified email');
+        response = generateAPIResponse('Successfully verified email', true);
         return [200, response];
     } catch(error) {
         console.log(error)

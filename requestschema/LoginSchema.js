@@ -1,8 +1,8 @@
 const joi = require('joi');
 
 const LoginSchema = joi.object({
-    email: joi.string().email(),
-    password: joi.string()
+    email: joi.string().email().required(),
+    password: joi.string().required()
 });
 
 module.exports = {

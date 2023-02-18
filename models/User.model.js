@@ -1,5 +1,6 @@
 const { DataTypes} = require("sequelize");
 const { getDBConnection } = require("../services/database");
+const { Board } = require("./Board.model");
 
 const sequelize = getDBConnection();
 
@@ -42,7 +43,15 @@ const User = sequelize.define('Users', {
     createdAt: 'created_on',
     updatedAt: 'modified_on',
     freezeTableName: true
-})
+});
+
+User.hasMany(Board, {
+    foreignKey: {
+        name: 'created_by',
+    },
+    onDelete: 'CASCADE',
+    onUpdate: 'RESTRICT'
+});
 
 module.exports = {
     User
