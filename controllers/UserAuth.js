@@ -49,7 +49,7 @@ const registerUser = async (userData) => {
         const userCreationResult = await createUser(userData);
         if(userCreationResult.errorMessage) {
             response = generateAPIResponse(userCreationResult.errorMessage);
-            return [userCreationResult.status, userCreationResult.errorMessage];
+            return [userCreationResult.status, response];
         } else {
             response = generateAPIResponse('Successfully created user');
             return [201, response]

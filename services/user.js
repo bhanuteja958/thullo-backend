@@ -25,7 +25,7 @@ const checkIfUserWithEmailExists = async (email) => {
 
 const createUser = async (userDetails) => {
     try {
-        const {email, first_name, last_name, hashedPassword} = userDetails;
+        const {email, first_name, last_name, hashedPassword, token} = userDetails;
         const user = await User.create({
             first_name,
             last_name,

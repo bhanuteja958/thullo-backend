@@ -42,7 +42,93 @@ const getBoards = async( userId) => {
     }
 }
 
+const getSingleBoard = async (boardId, userId) => {
+    try{
+        const boardResult = await Board.findOne({
+            attributes:['id','title','cover_photo_url','description','created_on','visibility'],
+            where: {
+                created_by: userId,
+                id: boardId
+            }
+        });
+
+        console.log(boardResult);
+
+        if(!boardResult) {
+            return {
+                errorMessage: 'No board with the given id exists',
+                status: 400
+            }
+        }
+
+        return boardResult
+    } catch(error) {
+        console.log('Error while fetching board data: ', error);
+        return {
+            errorMessage: 'Error while fetching board data',
+            status: 400
+        }
+    }
+}
+
+const updateSingleBoard = async (boardId, userId, boardValuesToBeUpdated) => {
+    try{
+        const boardResult = await Board.update ({
+            ...boardValuesToBeUpdated
+        }, {
+            where: {
+                id: boardId,
+                created_by: userId
+            }
+        });
+
+        if(boardResult && boardResult[0] === 0) {
+            return {
+                errorMessage: 'No Board with the given id exists',
+                status: 400
+            }
+        }
+
+        return boardResult
+    } catch(error) {
+        console.log('Error while updating board data data: ', error);
+        return {
+            errorMessage: 'Error while uopdating board data',
+            status: 400
+        }
+    }
+}
+
+const deleteBoard = async (boardId, userId) => {
+    try {
+        const deleteBoardResult = await Board.destroy({
+            where: {
+                created_by: userId,
+                id: boardId
+            }
+        });
+
+        if(deleteBoardResult === 0) {
+            return {
+                errorMessage: 'No Board with the given id exists',
+                status: 400
+            }
+        }
+
+        return deleteBoardResult
+    } catch(error) {
+        console.log('Error while deleting board: ', error);
+        return {
+            errorMessage: 'Error while deleting board',
+            status: 400
+        }
+    }       
+}
+
 module.exports = {
     createBoard,
-    getBoards
+    getBoards,
+    getSingleBoard,
+    updateSingleBoard,
+    deleteBoard
 }
