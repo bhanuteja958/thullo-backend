@@ -1,6 +1,6 @@
 const { DataTypes} = require("sequelize");
 const { getDBConnection } = require("../services/database");
-const { User } = require("./User.model");
+const { List } = require("./List.model");
 
 const sequelize = getDBConnection();
 
@@ -36,6 +36,14 @@ const Board = sequelize.define('Boards',{
     timestamps: true,
     createdAt: 'created_on',
     updatedAt: 'modified_on'
+});
+
+Board.hasMany(List, {
+    foreignKey: {
+        name: 'board_id',
+    },
+    onDelete: "CASCADE",
+    onUpdate: "NO ACTION",
 });
 
 module.exports = {

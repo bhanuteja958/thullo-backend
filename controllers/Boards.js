@@ -1,6 +1,6 @@
 const { generateAPIResponse, checkPayloadSchema } = require("../common/helper");
-const { CreateBoardSchema } = require("../requestschema/BoardSchema");
-const { createBoard, getBoards, getSingleBoard, updateSingleBoard, deleteBoard } = require("../services/board");
+const { CreateBoardSchema, AddMemberSchema } = require("../requestschema/BoardSchema");
+const { createBoard, getBoards, getSingleBoard, updateSingleBoard, deleteBoard, addMember, removeMember, checkIfBoardAdmin } = require("../services/board");
 const { extractAndVerifyToken } = require("../services/jwttoken");
 
 const createUserBoard = async (req) => {
@@ -181,8 +181,84 @@ const deleteBoardData = async (req) => {
     } catch(error) {
         console.log(error);
     }   
-}       
+}
 
+const addMemberToBoard = async (req) => {
+    let response = {}
+    try {
+         //verify access token
+         const verifyTokenResult = extractAndVerifyToken(req.headers?.authorization);
+        
+         if(verifyTokenResult.errorMessage) {
+             response = generateAPIResponse(verifyTokenResult.errorMessage);
+             return [verifyTokenResult.status, response];
+         }
+
+         //payload check
+         const checkPayloadSchemaResult = checkPayloadSchema(AddMemberSchema, req.body);
+
+         if(checkPayloadSchemaResult.errorMessage) {
+             response = generateAPIResponse(checkPayloadSchemaResult.errorMessage);
+             return [checkPayloadSchemaResult.status, response]
+         }
+
+         const {board_id, user_id} = req.body;
+
+         const checkIfAdminResult = await checkIfBoardAdmin(board_id, verifyTokenResult.id);
+
+         if(checkIfAdminResult.errorMessage) {
+             response = generateAPIResponse(checkIfAdminResult.errorMessage);
+             return [checkIfAdminResult.status, response];
+         }
+
+         const addMemberResult = await addMember(board_id, user_id);
+
+         if(addMemberResult.errorMessage) {
+            response = generateAPIResponse(addMemberResult.errorMessage)
+            return [addMemberResult.status, response];
+         }
+
+         response = generateAPIResponse('Successfully added user to the board', true);
+         return [201, response];
+    } catch(error) {
+        console.log(error);
+    }
+}
+
+
+const removeMemberFromBoard = async (req) => {
+    let response = {}
+    try {
+        //verify access token
+        const verifyTokenResult = extractAndVerifyToken(req.headers?.authorization);
+        
+        if(verifyTokenResult.errorMessage) {
+            response = generateAPIResponse(verifyTokenResult.errorMessage);
+            return [verifyTokenResult.status, response];
+        }
+
+        const {board_id, user_id} = req.params;
+
+        const checkIfAdminResult = await checkIfBoardAdmin(board_id, verifyTokenResult.id);
+
+        if(checkIfAdminResult.errorMessage) {
+            response = generateAPIResponse(checkIfAdminResult.errorMessage);
+            return [checkIfAdminResult.status, response];
+        }
+
+        const removeMemberResult = await removeMember(board_id, user_id);
+
+        if(removeMemberResult.errorMessage) {
+            response = generateAPIResponse(removeMemberResult.errorMessage);
+            return [removeMemberResult.status, response];
+        }
+
+        response = generateAPIResponse('Succesfully removed user from the board', true)
+        return [200, response];
+    } catch(error) {
+
+    }
+}
 
 
 module.exports = {
@@ -190,5 +266,7 @@ module.exports = {
     getBoardsOfUser,
     getBoardData,
     updateBoardData,
-    deleteBoardData
+    deleteBoardData,
+    addMemberToBoard,
+    removeMemberFromBoard
 }

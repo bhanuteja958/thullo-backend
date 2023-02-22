@@ -1,4 +1,6 @@
-const { Board } = require("../models/Board.model")
+const { Board } = require("../models/Board.model");
+const { BoardUserMapping } = require("../models/BoardUserMapping.model");
+const { User } = require("../models/User.model");
 
 const createBoard = async (boardData) => {
     try {
@@ -125,10 +127,89 @@ const deleteBoard = async (boardId, userId) => {
     }       
 }
 
+const addMember = async (board_id, user_id) => {
+    try{
+        const addMemberResult = await BoardUserMapping.create({
+            board_id,
+            user_id,
+        })
+
+        return addMemberResult;
+    } catch(error) {
+        console.log('Error while adding member to board: ', error);
+        return {
+            errorMessage: 'Error while adding member board',
+            status: 400
+        }
+    }
+}
+
+const removeMember = async (board_id, user_id) => {
+    try {
+        const removeMemberResult = await BoardUserMapping.destroy({
+            where: {
+                board_id,
+                user_id
+            }
+        })
+
+        if(removeMemberResult === 0) {
+            return {
+                errorMessage: 'No user with the given id exists with the given board id',
+                status: 400
+            }
+        }
+
+        return removeMemberResult
+    } catch(error) {
+        console.log('Error while removing member from board: ', error);
+        return {
+            errorMessage: 'Error while removing member from board',
+            status: 400
+        }
+    }
+}
+
+const checkIfBoardAdmin = async(board_id, admin_id) => {
+    try {
+        const boardResult = await Board.findOne({
+            attributes: ['created_by'],
+            where: {
+                id: board_id
+            }
+        });
+
+        if(!boardResult) {
+            return {
+                errorMessage: "No board with given id exists",
+                status: 400,
+            }
+        }
+
+        if(boardResult.created_by === admin_id) {
+            return boardResult
+        } else {
+            return {
+                errorMessage: "You don't have permission to add/remove  members to/from the board",
+                status: 403,
+            }
+        }  
+    } catch(error) {
+        console.log('Error while checking board admin: ', error);
+        return {
+            errorMessage: 'Something went wrong',
+            status: 400
+        }
+    }
+}
+
 module.exports = {
     createBoard,
     getBoards,
     getSingleBoard,
     updateSingleBoard,
-    deleteBoard
+    deleteBoard,
+    addMember,
+    removeMember,
+    checkIfBoardAdmin
 }

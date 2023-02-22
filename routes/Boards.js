@@ -1,6 +1,6 @@
 const express = require('express');
 const { generateAPIResponse } = require('../common/helper');
-const { createUserBoard, getBoardsOfUser, getBoardData, updateBoardData, deleteBoardData } = require('../controllers/Boards');
+const { createUserBoard, getBoardsOfUser, getBoardData, updateBoardData, deleteBoardData, addMemberToBoard, removeMemberFromBoard } = require('../controllers/Boards');
 const router = express.Router();
 
 router.get('/', async (req, res) => {
@@ -46,6 +46,26 @@ router.put('/:boardId', async (req, res) => {
 router.delete('/:boardId', async (req, res) => {
     try {
         const [status, response] = await deleteBoardData(req);
+        res.status(status).json(response);
+    } catch(error) {
+        console.log(error);
+        res.status(500).json(generateAPIResponse('Something went wrong'));
+    }
+})
+
+router.post('/addMember', async(req, res) => {
+    try{
+        const [status, response] = await addMemberToBoard(req);
+        res.status(status).json(response);
+    } catch(error) {
+        console.log(error);
+        res.status(500).json(generateAPIResponse('Something went wrong'));
+    }
+});
+
+router.delete('/removeMember/:board_id/:user_id', async(req, res) => {
+    try{
+        const [status, response] = await removeMemberFromBoard(req);
         res.status(status).json(response);
     } catch(error) {
         console.log(error);

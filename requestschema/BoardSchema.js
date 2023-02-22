@@ -12,9 +12,15 @@ const UpdateBoardSchema = joi.object({
     cover_photo_url: joi.string().allow(''),
     description: joi.string().allow(''),
     visibility: joi.string().valid('public','private') 
+});
+
+const AddMemberSchema = joi.object({
+    board_id: joi.string().required(),
+    user_id: joi.string().required(),
 })
 
 module.exports ={
     CreateBoardSchema,
-    UpdateBoardSchema
+    UpdateBoardSchema,
+    AddMemberSchema
 };
