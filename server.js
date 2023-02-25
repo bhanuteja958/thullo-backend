@@ -7,11 +7,13 @@ const authRouter = require('./routes/UserAuth');
 const boardsRouter = require('./routes/Boards');
 const listsRouter = require('./routes/Lists');
 const { connectToDB } = require('./services/database');
+const { accessTokenVerification } = require('./middlewares');
 
 const app = express();
 
 //Middlewares for parsing incoming json
 app.use(express.json());
+app.use(accessTokenVerification);
 
 app.use('/api/user', authRouter);
 

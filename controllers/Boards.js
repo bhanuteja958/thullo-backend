@@ -1,30 +1,20 @@
 const { generateAPIResponse, checkPayloadSchema } = require("../common/helper");
-const { CreateBoardSchema, AddMemberSchema } = require("../requestschema/BoardSchema");
+const { CreateBoardSchema, AddMemberSchema, UpdateBoardSchema } = require("../requestschema/BoardSchema");
 const { createBoard, getBoards, getSingleBoard, updateSingleBoard, deleteBoard, addMember, removeMember, checkIfBoardAdmin } = require("../services/board");
 const { extractAndVerifyToken } = require("../services/jwttoken");
 
 const createUserBoard = async (req) => {
     let response = {};
     try {
-        const verifyTokenResult = extractAndVerifyToken(req.headers?.authorization);
-        
-        if(verifyTokenResult.errorMessage) {
-            response = generateAPIResponse(verifyTokenResult.errorMessage);
-            return [verifyTokenResult.status, response];
-        }
-
         const checkPayloadSchemaResult = checkPayloadSchema(CreateBoardSchema, req.body);
 
         if(checkPayloadSchemaResult.errorMessage) {
             response = generateAPIResponse(checkPayloadSchemaResult.errorMessage);
-            return [checkPayloadSchemaResult.status, response]
+            return [checkPayloadSchemaResult.status, checkPayloadSchemaResult.errorMessage];
         }
 
-        req.body.user_id = verifyTokenResult.id;
-
-
+        req.body.user_id = req.userInfo.id;
         const createBoardResult = await createBoard(req.body);
-
         
         if(createBoardResult.errorMessage){
             response = generateAPIResponse(createBoardResult.errorMessage);
@@ -41,15 +31,7 @@ const createUserBoard = async (req) => {
 const getBoardsOfUser = async (req) => {
     let response = {}
     try {
-        //verify token 
-        const verifyTokenResult = extractAndVerifyToken(req.headers?.authorization);
-        
-        if(verifyTokenResult.errorMessage) {
-            response = generateAPIResponse(verifyTokenResult.errorMessage);
-            return [verifyTokenResult.status, response];
-        }
-
-        const userId = verifyTokenResult.id;
+        const userId = req.userInfo.id;
 
         const getBoardsResult = await getBoards(userId);
 
@@ -57,8 +39,6 @@ const getBoardsOfUser = async (req) => {
             response = generateAPIResponse(getBoardsResult.errorMessage);
             return [getBoardsResult.status, response];
         }
-
-        console.log(getBoardsResult)
 
         response = generateAPIResponse('Successfully fetched boards', true, data=getBoardsResult);
         return [200, response];
@@ -69,22 +49,8 @@ const getBoardsOfUser = async (req) => {
 
 const getBoardData = async (req) => {
     try {
-        //verify token
-        const verifyTokenResult = extractAndVerifyToken(req.headers?.authorization);
-        
-        if(verifyTokenResult.errorMessage) {
-            response = generateAPIResponse(verifyTokenResult.errorMessage);
-            return [verifyTokenResult.status, response];
-        }
-
         const boardId = req.params.boardId
-
-        if(!boardId){
-            response = generateAPIResponse("Board Id is empty");
-            return [400, response];
-        }
-
-        const userId = verifyTokenResult.id;
+        const userId = req.userInfo.id;
 
         const boardDataResult = await getSingleBoard(boardId, userId);
 
@@ -103,34 +69,19 @@ const getBoardData = async (req) => {
 const updateBoardData = async (req) => {
     let response = {};
     try {
-        //verify access token
-        const verifyTokenResult = extractAndVerifyToken(req.headers?.authorization);
-        
-        if(verifyTokenResult.errorMessage) {
-            response = generateAPIResponse(verifyTokenResult.errorMessage);
-            return [verifyTokenResult.status, response];
-        }
-
-        const boardId = req.params.boardId
-
-        if(!boardId){
-            response = generateAPIResponse("Board Id is empty");
-            return [400, response];
-        }
-
-        //verify request payload
-
-        const checkPayloadSchemaResult = checkPayloadSchema(CreateBoardSchema, req.body);
+        const checkPayloadSchemaResult = checkPayloadSchema(UpdateBoardSchema, req.body);
 
         if(checkPayloadSchemaResult.errorMessage) {
             response = generateAPIResponse(checkPayloadSchemaResult.errorMessage);
-            return [checkPayloadSchemaResult.status, response]
+            return [checkPayloadSchemaResult.status, checkPayloadSchemaResult.errorMessage];
         }
 
-        const userId = verifyTokenResult.id;
+        const boardId = req.params.boardId
+        const userId = req.userInfo.id;
         const boardValuesToBeUpdated = req.body;
-    
 
+       
+    
         //update board
         const boardDataResult = await updateSingleBoard(boardId, userId, boardValuesToBeUpdated);
 
@@ -149,23 +100,8 @@ const updateBoardData = async (req) => {
 const deleteBoardData = async (req) => {
     let response = {};
     try {
-
-        //verify access token
-        const verifyTokenResult = extractAndVerifyToken(req.headers?.authorization);
-        
-        if(verifyTokenResult.errorMessage) {
-            response = generateAPIResponse(verifyTokenResult.errorMessage);
-            return [verifyTokenResult.status, response];
-        }
-
-        const userId = verifyTokenResult.id;
-
+        const userId = req.userInfo.id;
         const boardId = req.params.boardId
-
-        if(!boardId){
-            response = generateAPIResponse("Board Id is empty");
-            return [400, response];
-        }
 
         //delete board
         const deleteBoardResult = await deleteBoard(boardId, userId);
@@ -186,40 +122,30 @@ const deleteBoardData = async (req) => {
 const addMemberToBoard = async (req) => {
     let response = {}
     try {
-         //verify access token
-         const verifyTokenResult = extractAndVerifyToken(req.headers?.authorization);
-        
-         if(verifyTokenResult.errorMessage) {
-             response = generateAPIResponse(verifyTokenResult.errorMessage);
-             return [verifyTokenResult.status, response];
-         }
+        const checkPayloadSchemaResult = checkPayloadSchema(AddMemberSchema, req.body);
 
-         //payload check
-         const checkPayloadSchemaResult = checkPayloadSchema(AddMemberSchema, req.body);
+        if(checkPayloadSchemaResult.errorMessage) {
+            response = generateAPIResponse(checkPayloadSchemaResult.errorMessage);
+            return [checkPayloadSchemaResult.status, checkPayloadSchemaResult.errorMessage];
+        }
+        const {board_id, user_id} = req.body;
 
-         if(checkPayloadSchemaResult.errorMessage) {
-             response = generateAPIResponse(checkPayloadSchemaResult.errorMessage);
-             return [checkPayloadSchemaResult.status, response]
-         }
+        const checkIfAdminResult = await checkIfBoardAdmin(board_id, req.userInfo.id);
 
-         const {board_id, user_id} = req.body;
+        if(checkIfAdminResult.errorMessage) {
+            response = generateAPIResponse(checkIfAdminResult.errorMessage);
+            return [checkIfAdminResult.status, response];
+        }
 
-         const checkIfAdminResult = await checkIfBoardAdmin(board_id, verifyTokenResult.id);
+        const addMemberResult = await addMember(board_id, user_id);
 
-         if(checkIfAdminResult.errorMessage) {
-             response = generateAPIResponse(checkIfAdminResult.errorMessage);
-             return [checkIfAdminResult.status, response];
-         }
+        if(addMemberResult.errorMessage) {
+        response = generateAPIResponse(addMemberResult.errorMessage)
+        return [addMemberResult.status, response];
+        }
 
-         const addMemberResult = await addMember(board_id, user_id);
-
-         if(addMemberResult.errorMessage) {
-            response = generateAPIResponse(addMemberResult.errorMessage)
-            return [addMemberResult.status, response];
-         }
-
-         response = generateAPIResponse('Successfully added user to the board', true);
-         return [201, response];
+        response = generateAPIResponse('Successfully added user to the board', true);
+        return [201, response];
     } catch(error) {
         console.log(error);
     }
@@ -229,17 +155,10 @@ const addMemberToBoard = async (req) => {
 const removeMemberFromBoard = async (req) => {
     let response = {}
     try {
-        //verify access token
-        const verifyTokenResult = extractAndVerifyToken(req.headers?.authorization);
-        
-        if(verifyTokenResult.errorMessage) {
-            response = generateAPIResponse(verifyTokenResult.errorMessage);
-            return [verifyTokenResult.status, response];
-        }
 
         const {board_id, user_id} = req.params;
 
-        const checkIfAdminResult = await checkIfBoardAdmin(board_id, verifyTokenResult.id);
+        const checkIfAdminResult = await checkIfBoardAdmin(board_id, req.userInfo.id);
 
         if(checkIfAdminResult.errorMessage) {
             response = generateAPIResponse(checkIfAdminResult.errorMessage);

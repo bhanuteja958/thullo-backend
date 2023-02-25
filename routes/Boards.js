@@ -9,7 +9,8 @@ router.get('/', async (req, res) => {
         res.status(status).json(response);
     } catch(error) {
         console.log(error);
-        res.status(500).json(generateAPIResponse('Something went wrong'));
+        const response = generateAPIResponse('Something went wrong')
+        res.status(500).json(response);
     }
 })
 

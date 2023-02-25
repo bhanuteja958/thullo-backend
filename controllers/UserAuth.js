@@ -7,15 +7,14 @@ const { generateJWTToken, extractAndVerifyToken } = require('../services/jwttoke
 const { sendVerifyEmail } = require('../services/mailing');
 
 const registerUser = async (userData) => {
-    try {
-        let response = {}
+    let response = {}
 
-        //check payload schema
+    try {
         const checkPayloadSchemaResult = checkPayloadSchema(RegisterSchema, userData);
 
         if(checkPayloadSchemaResult.errorMessage) {
             response = generateAPIResponse(checkPayloadSchemaResult.errorMessage);
-            return [checkPayloadSchemaResult.status, response]
+            return [checkPayloadSchemaResult.status, checkPayloadSchemaResult.errorMessage];
         }
 
         const { email, password} = userData;
@@ -61,14 +60,14 @@ const registerUser = async (userData) => {
 }
 
 const loginUser = async (loginData) => {
-    try{
-        let response = {}
-        //checking payload schema
+    let response = {};
+    
+    try {
         const checkPayloadSchemaResult = checkPayloadSchema(LoginSchema, loginData);
 
         if(checkPayloadSchemaResult.errorMessage) {
             response = generateAPIResponse(checkPayloadSchemaResult.errorMessage);
-            return [checkPayloadSchemaResult.status, response]
+            return [checkPayloadSchemaResult.status, checkPayloadSchemaResult.errorMessage];
         }
 
         const {email, password} = loginData
@@ -128,19 +127,10 @@ const loginUser = async (loginData) => {
     }
 }
 
-const sendVerificationEmail = async (bearerToken) => {
+const sendVerificationEmail = async () => {
     let response = {};
     try {
-        //verify auth token
-        const verifyTokenResult = await extractAndVerifyToken(bearerToken);
-        
-        if(verifyTokenResult.errorMessage) {
-            response = generateAPIResponse(verifyTokenResult.errorMessage);
-            return [verifyTokenResult.status, response];
-        }
-
-        //fetch user token
-        const tokenResult = await getUserToken(verifyTokenResult.email);
+        const tokenResult = await getUserToken(req.userInfo.email);
 
         if(tokenResult.errorMessage) {
             response = generateAPIResponse(tokenResult.errorMessage);
@@ -148,7 +138,7 @@ const sendVerificationEmail = async (bearerToken) => {
         }
 
         //send verification email
-        const sendVerifyEmailResult = await sendVerifyEmail(tokenResult, verifyTokenResult.email);
+        const sendVerifyEmailResult = await sendVerifyEmail(tokenResult, req.userInfo.email);
 
         if(sendVerifyEmailResult.errorMessage) {
             response = generateAPIResponse(sendVerifyEmailResult.errorMessage);
@@ -165,12 +155,7 @@ const sendVerificationEmail = async (bearerToken) => {
 const verifyUserToken = async (token) => {
     let response = {}
     try{
-        //token check
-        if(!token) {
-            response = generateAPIResponse('Not able to verify');
-            return [500, response];
-        }
-
+        
         const checkUserTokenResult = await checkUserToken(token);
 
         if(checkUserTokenResult.errorMessage) {

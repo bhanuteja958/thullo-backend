@@ -54,8 +54,6 @@ const getSingleBoard = async (boardId, userId) => {
             }
         });
 
-        console.log(boardResult);
-
         if(!boardResult) {
             return {
                 errorMessage: 'No board with the given id exists',

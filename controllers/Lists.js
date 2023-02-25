@@ -8,30 +8,21 @@ const { createList, updateList, deleteList, getBoardIdForList } = require("../se
 const createListForBoard = async(req) => {
     let response = {}
     try {
-        //verify access token
-        const verifyTokenResult = extractAndVerifyToken(req.headers?.authorization);
-        
-        if(verifyTokenResult.errorMessage) {
-            response = generateAPIResponse(verifyTokenResult.errorMessage);
-            return [verifyTokenResult.status, response];
-        }
-        
         const checkPayloadSchemaResult = checkPayloadSchema(CreateListSchema, req.body);
 
         if(checkPayloadSchemaResult.errorMessage) {
             response = generateAPIResponse(checkPayloadSchemaResult.errorMessage);
-            return [checkPayloadSchemaResult.status , response];
+            return [checkPayloadSchemaResult.status, checkPayloadSchemaResult.errorMessage];
         }
-
         const {name, board_id} = req.body;
 
-        const checkIfBoardAdminResult = await checkIfBoardAdmin(board_id, verifyTokenResult.id);
+        const checkIfBoardAdminResult = await checkIfBoardAdmin(board_id, req.userInfo.id);
         if(checkIfBoardAdminResult.errorMessage) {
             response = generateAPIResponse(checkIfBoardAdminResult.errorMessage);
             return[checkIfBoardAdminResult.status, response];
         }
 
-        const createListResult = await createList(name, board_id, verifyTokenResult.id);
+        const createListResult = await createList(name, board_id, req.userInfo.id);
 
         if(createListResult.errorMessage) {
             response = generateAPIResponse(createListResult.errorMessage);
@@ -49,20 +40,12 @@ const createListForBoard = async(req) => {
 const updateListOfBoard = async (req) => {
     let response = {}
     try {
-        //verify access token
-        const verifyTokenResult = extractAndVerifyToken(req.headers?.authorization);
-        
-        if(verifyTokenResult.errorMessage) {
-            response = generateAPIResponse(verifyTokenResult.errorMessage);
-            return [verifyTokenResult.status, response];
-        }
-        
         const checkPayloadSchemaResult = checkPayloadSchema(UpdateListSchema, req.body);
+
         if(checkPayloadSchemaResult.errorMessage) {
             response = generateAPIResponse(checkPayloadSchemaResult.errorMessage);
-            return [checkPayloadSchemaResult.status, response];
+            return [checkPayloadSchemaResult.status, checkPayloadSchemaResult.errorMessage];
         }
-
         const {name} = req.body;
         const {list_id} = req.params;
 
@@ -72,7 +55,7 @@ const updateListOfBoard = async (req) => {
             return [boardIdForListResult.status, response];
         }
 
-        const checkIfBoardAdminResult = await checkIfBoardAdmin(boardIdForListResult, verifyTokenResult.id);
+        const checkIfBoardAdminResult = await checkIfBoardAdmin(boardIdForListResult, req.userInfo.id);
         if(checkIfBoardAdminResult.errorMessage) {
             response = generateAPIResponse(checkIfBoardAdminResult.errorMessage);
             return[checkIfBoardAdminResult.status, response];
@@ -94,14 +77,6 @@ const updateListOfBoard = async (req) => {
 const deleteListFromBoard = async(req) => {
     let response = {}
     try {
-        //verify access token
-        const verifyTokenResult = extractAndVerifyToken(req.headers?.authorization);
-        
-        if(verifyTokenResult.errorMessage) {
-            response = generateAPIResponse(verifyTokenResult.errorMessage);
-            return [verifyTokenResult.status, response];
-        }
-
         const {list_id} = req.params;
 
         const boardIdForListResult = await getBoardIdForList(list_id);
@@ -110,7 +85,7 @@ const deleteListFromBoard = async(req) => {
             return [boardIdForListResult.status, response];
         }
 
-        const checkIfBoardAdminResult = await checkIfBoardAdmin(boardIdForListResult, verifyTokenResult.id);
+        const checkIfBoardAdminResult = await checkIfBoardAdmin(boardIdForListResult, req.userInfo.id);
         if(checkIfBoardAdminResult.errorMessage) {
             response = generateAPIResponse(checkIfBoardAdminResult.errorMessage);
             return[checkIfBoardAdminResult.status, response];
