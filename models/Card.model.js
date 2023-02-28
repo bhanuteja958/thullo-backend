@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const {getDBConnection} = require('../services/database');
+const { List } = require('./List.model');
 const sequelize = getDBConnection();
 
 const Card = sequelize.define('cards',{

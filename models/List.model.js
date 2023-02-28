@@ -35,7 +35,9 @@ List.hasMany(Card, {
     },
     onDelete: "CASCADE",
     onUpdate: "NO ACTION",
-})
+});
+
+Card.belongsTo(List, {foreignKey: 'list_id'});
 
 module.exports = {
     List

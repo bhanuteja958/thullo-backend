@@ -6,6 +6,7 @@ const { FALLBACK_PORT } = require('./common/constants');
 const authRouter = require('./routes/UserAuth');
 const boardsRouter = require('./routes/Boards');
 const listsRouter = require('./routes/Lists');
+const cardsRouter = require('./routes/Cards');
 const { connectToDB } = require('./services/database');
 const { accessTokenVerification } = require('./middlewares');
 
@@ -20,6 +21,8 @@ app.use('/api/user', authRouter);
 app.use('/api/board', boardsRouter);
 
 app.use('/api/list', listsRouter);
+
+app.use('/api/card', cardsRouter);
 
 connectToDB().then(() => {
     const PORT = process.env.PORT || FALLBACK_PORT;

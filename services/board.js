@@ -201,6 +201,32 @@ const checkIfBoardAdmin = async(board_id, admin_id) => {
     }
 }
 
+const checkIfBoardMember = async (board_id,user_id) => {
+    try {
+        const checkIfBoardMemberResult = await BoardUserMapping.findOne({
+            where: {
+                user_id,
+                board_id,
+            }
+        });
+
+        if(!checkIfBoardMemberResult) {
+            return {
+                errorMessage: "You dont have permission to do this action",
+                status: 403,
+            }
+        }
+
+        return true;
+    } catch(error) {
+        console.log('Error while checking board member: ', error);
+        return {
+            errorMessage: 'Something went wrong',
+            status: 400
+        }
+    }
+} 
+
 module.exports = {
     createBoard,
     getBoards,
@@ -209,5 +235,6 @@ module.exports = {
     deleteBoard,
     addMember,
     removeMember,
-    checkIfBoardAdmin
+    checkIfBoardAdmin,
+    checkIfBoardMember
 }
