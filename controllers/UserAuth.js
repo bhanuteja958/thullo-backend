@@ -10,13 +10,6 @@ const registerUser = async (userData) => {
     let response = {}
 
     try {
-        const checkPayloadSchemaResult = checkPayloadSchema(RegisterSchema, userData);
-
-        if(checkPayloadSchemaResult.errorMessage) {
-            response = generateAPIResponse(checkPayloadSchemaResult.errorMessage);
-            return [checkPayloadSchemaResult.status, checkPayloadSchemaResult.errorMessage];
-        }
-
         const { email, password} = userData;
 
         //email already exists check 
@@ -63,12 +56,6 @@ const loginUser = async (loginData) => {
     let response = {};
     
     try {
-        const checkPayloadSchemaResult = checkPayloadSchema(LoginSchema, loginData);
-
-        if(checkPayloadSchemaResult.errorMessage) {
-            response = generateAPIResponse(checkPayloadSchemaResult.errorMessage);
-            return [checkPayloadSchemaResult.status, checkPayloadSchemaResult.errorMessage];
-        }
 
         const {email, password} = loginData
 

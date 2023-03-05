@@ -6,13 +6,6 @@ const { extractAndVerifyToken } = require("../services/jwttoken");
 const createUserBoard = async (req) => {
     let response = {};
     try {
-        const checkPayloadSchemaResult = checkPayloadSchema(CreateBoardSchema, req.body);
-
-        if(checkPayloadSchemaResult.errorMessage) {
-            response = generateAPIResponse(checkPayloadSchemaResult.errorMessage);
-            return [checkPayloadSchemaResult.status, checkPayloadSchemaResult.errorMessage];
-        }
-
         req.body.user_id = req.userInfo.id;
         const createBoardResult = await createBoard(req.body);
         
@@ -69,19 +62,10 @@ const getBoardData = async (req) => {
 const updateBoardData = async (req) => {
     let response = {};
     try {
-        const checkPayloadSchemaResult = checkPayloadSchema(UpdateBoardSchema, req.body);
-
-        if(checkPayloadSchemaResult.errorMessage) {
-            response = generateAPIResponse(checkPayloadSchemaResult.errorMessage);
-            return [checkPayloadSchemaResult.status, checkPayloadSchemaResult.errorMessage];
-        }
-
         const boardId = req.params.boardId
         const userId = req.userInfo.id;
         const boardValuesToBeUpdated = req.body;
 
-       
-    
         //update board
         const boardDataResult = await updateSingleBoard(boardId, userId, boardValuesToBeUpdated);
 
@@ -122,12 +106,6 @@ const deleteBoardData = async (req) => {
 const addMemberToBoard = async (req) => {
     let response = {}
     try {
-        const checkPayloadSchemaResult = checkPayloadSchema(AddMemberSchema, req.body);
-
-        if(checkPayloadSchemaResult.errorMessage) {
-            response = generateAPIResponse(checkPayloadSchemaResult.errorMessage);
-            return [checkPayloadSchemaResult.status, checkPayloadSchemaResult.errorMessage];
-        }
         const {board_id, user_id} = req.body;
 
         const checkIfAdminResult = await checkIfBoardAdmin(board_id, req.userInfo.id);

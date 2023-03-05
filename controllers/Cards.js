@@ -8,13 +8,6 @@ const { getBoardIdForList } = require('../services/list');
 const createCardForAList = async (req) => {
     let response = {};
     try {
-        const checkPayloadSchemaResult = checkPayloadSchema(CreateCardSchema, req.body);
-
-        if(checkPayloadSchemaResult.errorMessage) {
-            response = generateAPIResponse(checkPayloadSchemaResult.errorMessage);
-            return [checkPayloadSchemaResult.status, response];
-        }
-
         const {list_id} = req.body;
 
         const getBoardIdForListResult = await getBoardIdForList(list_id);
@@ -49,13 +42,6 @@ const createCardForAList = async (req) => {
 const updateCardOfList = async (req) => {
     let response = {};
     try {
-        const checkPayloadSchemaResult = checkPayloadSchema(UpdateCardSchema, req.body);
-
-        if(checkPayloadSchemaResult.errorMessage) {
-            response = generateAPIResponse(checkPayloadSchemaResult.errorMessage);
-            return [checkPayloadSchemaResult.status, response];
-        }
-
         const {card_id} = req.params;
 
         const getBoardIdOfCardResult = await getBoardIdOfCard(card_id);
@@ -145,8 +131,6 @@ const deleteCardFromList = async (req) => {
             return [checkIfBoardMemberResult.status, response];
         }
 
-        
-
         const deleteCardResult = await deleteCard(card_id);
 
         if(deleteCardResult.errorMessage) {
@@ -164,14 +148,6 @@ const deleteCardFromList = async (req) => {
 const addMemberToCard = async (req) => {
     let response = {};
     try {
-
-        const checkPayloadSchemaResult = checkPayloadSchema(AddMemberSchema, req.body)
-        
-        if(checkPayloadSchemaResult.errorMessage) {
-            response = generateAPIResponse(checkPayloadSchemaResult.errorMessage);
-            return [checkPayloadSchemaResult.status, checkPayloadSchemaResult.errorMessage];
-        }
-
         const {card_id, user_id} = req.body;
         const createdBy = req.userInfo.id;
 

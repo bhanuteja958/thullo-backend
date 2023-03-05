@@ -1,6 +1,6 @@
 const { DataTypes } = require('sequelize');
 const {getDBConnection} = require('../services/database');
-const { List } = require('./List.model');
+const { Comment } = require('./Comment.model');
 const sequelize = getDBConnection();
 
 const Card = sequelize.define('cards',{
@@ -41,7 +41,13 @@ const Card = sequelize.define('cards',{
     createdAt: 'created_on',
     updatedAt: 'modified_on'    
 });
+
+Card.hasMany(Comment , {
+    foreignKey: 'card_id',
+    onDelete: "CASCADE",
+    onUpdate: "NO ACTION"
+});
     
 module.exports = {
     Card
-}
+};

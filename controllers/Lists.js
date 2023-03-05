@@ -8,12 +8,6 @@ const { createList, updateList, deleteList, getBoardIdForList } = require("../se
 const createListForBoard = async(req) => {
     let response = {}
     try {
-        const checkPayloadSchemaResult = checkPayloadSchema(CreateListSchema, req.body);
-
-        if(checkPayloadSchemaResult.errorMessage) {
-            response = generateAPIResponse(checkPayloadSchemaResult.errorMessage);
-            return [checkPayloadSchemaResult.status, checkPayloadSchemaResult.errorMessage];
-        }
         const {name, board_id} = req.body;
 
         const checkIfBoardAdminResult = await checkIfBoardAdmin(board_id, req.userInfo.id);
@@ -40,12 +34,6 @@ const createListForBoard = async(req) => {
 const updateListOfBoard = async (req) => {
     let response = {}
     try {
-        const checkPayloadSchemaResult = checkPayloadSchema(UpdateListSchema, req.body);
-
-        if(checkPayloadSchemaResult.errorMessage) {
-            response = generateAPIResponse(checkPayloadSchemaResult.errorMessage);
-            return [checkPayloadSchemaResult.status, checkPayloadSchemaResult.errorMessage];
-        }
         const {name} = req.body;
         const {list_id} = req.params;
 
