@@ -92,9 +92,34 @@ const deleteAttachment = async (attachmentId) => {
     }
 }
 
+const getAttachmentCardId = async (attachmentId) => {
+    try {
+        const attachmentIdResult = await Attachment.findOne({
+            attributes: ['card_id'],
+            where: {
+                id: attachmentId
+            }
+        });
+        if(!attachmentIdResult) {
+            return {
+                errorMessage: 'No attachment with the given id exists',
+                status: 400
+            }
+        }
+        return attachmentIdResult;
+    } catch(error) {
+        console.log("Error while card id of attachment: ", error);
+        return {
+            errorMessage: 'Error while card id of attachment',
+            status:400,
+        }
+    }
+}
+
 module.exports = {
     createAttachment,
     updateAttachment,
     getAttachments,
-    deleteAttachment
+    deleteAttachment,
+    getAttachmentCardId 
 }

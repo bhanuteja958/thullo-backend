@@ -11,6 +11,7 @@ const { CreateListSchema } = require('./requestschema/ListSchema');
 const { LoginSchema } = require('./requestschema/LoginSchema');
 const RegisterSchema = require('./requestschema/RegisterSchema');
 const { extractAndVerifyToken } = require("./services/jwttoken");
+const { getBoardIdForList } = require('./services/list');
 
 module.exports.accessTokenVerification = (req, res, next) => {
     if(!TOKEN_VERIFICATION_NOT_REQUIRED_URLS.includes(req.originalUrl)) {

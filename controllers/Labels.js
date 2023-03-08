@@ -1,9 +1,16 @@
-const { generateAPIResponse } = require("../common/Helper");
+const { generateAPIResponse, checkIfUserIsBoardMember } = require("../common/Helper");
 const { createLabel, updateLabel, getLabels, deleteLabel } = require("../services/labels");
 
 const createLabelForCard = async (req) => {
     let response = {};
     try {
+        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(req.body.card_id, 'card', req.userInfo.id);
+
+        if(checkIfBoardMemberResult.errorMessage) {
+            response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
+            return [checkIfBoardMemberResult.status, response];
+        }
+
         const createLabelResult = await createLabel(req.body, req.userInfo.id);
 
         if(createLabelResult.errorMessage) {
@@ -22,6 +29,14 @@ const updateLabelOfCard = async(req) => {
     let response = {};
     try {
         const {labelId} = req.params;
+
+        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(labelId, 'label', req.userInfo.id);
+
+        if(checkIfBoardMemberResult.errorMessage) {
+            response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
+            return [checkIfBoardMemberResult.status, response];
+        }
+
         const updateLabelResult = await updateLabel(req.body, labelId);
 
         if(updateLabelResult.errorMessage) {
@@ -40,6 +55,13 @@ const getLabelsOfCard = async (req) => {
     let response = {};
     try {
         const {cardId} = req.params;
+        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(cardId, 'card', req.userInfo.id);
+
+        if(checkIfBoardMemberResult.errorMessage) {
+            response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
+            return [checkIfBoardMemberResult.status, response];
+        }
+
         const getLabelsResult = await getLabels(cardId);
 
         if(getLabelsResult.errorMessage) {
@@ -58,6 +80,13 @@ const deleteLabelOfCard = async (req) => {
     let response = {}
     try {
         const {labelId} = req.params;
+        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(labelId, 'label', req.userInfo.id);
+
+        if(checkIfBoardMemberResult.errorMessage) {
+            response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
+            return [checkIfBoardMemberResult.status, response];
+        }
+        
         const deleteLabelResult = await deleteLabel(labelId);
 
         if(deleteLabelResult.errorMessage) {

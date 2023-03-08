@@ -95,9 +95,34 @@ const deleteLabel = (labelId) => {
     }
 }
 
+const getLabelCardId = async (labelId) => {
+    try {
+        const labelIdResult = await Label.findOne({
+            attributes: ['card_id'],
+            where: {
+                id: labelId
+            }
+        });
+        if(!labelIdResult) {
+            return {
+                errorMessage: 'No label with the given id exists',
+                status: 400
+            }
+        }
+        return labelIdResult;
+    } catch(error) {
+        console.log("Error while card id of label: ", error);
+        return {
+            errorMessage: 'Error while card id of label',
+            status:400,
+        }
+    }
+}
+
 module.exports = {
     createLabel,
     updateLabel,
     getLabels,
-    deleteLabel
+    deleteLabel,
+    getLabelCardId
 }

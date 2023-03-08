@@ -1,12 +1,11 @@
-const { generateAPIResponse, checkPayloadSchema } = require("../common/helper");
-const { CreateBoardSchema, AddMemberSchema, UpdateBoardSchema } = require("../requestschema/BoardSchema");
+const { generateAPIResponse, checkIfUserIsBoardMember} = require("../common/helper");
 const { createBoard, getBoards, getSingleBoard, updateSingleBoard, deleteBoard, addMember, removeMember, checkIfBoardAdmin } = require("../services/board");
-const { extractAndVerifyToken } = require("../services/jwttoken");
 
 const createUserBoard = async (req) => {
     let response = {};
     try {
         req.body.user_id = req.userInfo.id;
+
         const createBoardResult = await createBoard(req.body);
         
         if(createBoardResult.errorMessage){
@@ -45,6 +44,13 @@ const getBoardData = async (req) => {
         const boardId = req.params.boardId
         const userId = req.userInfo.id;
 
+        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(boardId, 'board', req.userInfo.id);
+
+        if(checkIfBoardMemberResult.errorMessage) {
+            response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
+            return [checkIfBoardMemberResult.status, response];
+        }
+
         const boardDataResult = await getSingleBoard(boardId, userId);
 
         if(boardDataResult.errorMessage) {
@@ -66,6 +72,13 @@ const updateBoardData = async (req) => {
         const userId = req.userInfo.id;
         const boardValuesToBeUpdated = req.body;
 
+        const checkIfAdminResult = await checkIfBoardAdmin(boardId, req.userInfo.id);
+
+        if(checkIfAdminResult.errorMessage) {
+            response = generateAPIResponse(checkIfAdminResult.errorMessage);
+            return [checkIfAdminResult.status, response];
+        }
+
         //update board
         const boardDataResult = await updateSingleBoard(boardId, userId, boardValuesToBeUpdated);
 
@@ -86,6 +99,13 @@ const deleteBoardData = async (req) => {
     try {
         const userId = req.userInfo.id;
         const boardId = req.params.boardId
+
+        const checkIfAdminResult = await checkIfBoardAdmin(boardId, req.userInfo.id);
+
+        if(checkIfAdminResult.errorMessage) {
+            response = generateAPIResponse(checkIfAdminResult.errorMessage);
+            return [checkIfAdminResult.status, response];
+        }
 
         //delete board
         const deleteBoardResult = await deleteBoard(boardId, userId);

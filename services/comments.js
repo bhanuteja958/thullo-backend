@@ -98,9 +98,34 @@ const deleteComment = async(commentId) => {
     }
 }
 
+const getCommentCardId = async (commentId) => {
+    try {
+        const commentIdResult = await Comment.findOne({
+            attributes: ['card_id'],
+            where: {
+                id: commentId
+            }
+        });
+        if(!commentIdResult) {
+            return {
+                errorMessage: 'No comment with the given id exists',
+                status: 400
+            }
+        }
+        return commentIdResult;
+    } catch(error) {
+        console.log("Error while card id of comment: ", error);
+        return {
+            errorMessage: 'Error while card id of comment',
+            status:400,
+        }
+    }
+}
+
 module.exports = {
     createComment,
     updateComment,
     getComments,
-    deleteComment
+    deleteComment,
+    getCommentCardId
 }

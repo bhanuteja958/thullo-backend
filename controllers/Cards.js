@@ -1,23 +1,12 @@
-const { response } = require('express');
-const {checkPayloadSchema, generateAPIResponse} = require('../common/helper');
-const { CreateCardSchema, UpdateCardSchema, AddMemberSchema } = require('../requestschema/CardSchema');
-const { checkIfBoardMember } = require('../services/board');
-const { createCard, updateCard, getCard, deleteCard, addMember, removeMember, getBoardIdOfCard } = require('../services/cards');
-const { getBoardIdForList } = require('../services/list');
+const {generateAPIResponse, checkIfUserIsBoardMember} = require('../common/helper');
+const { createCard, updateCard, getCard, deleteCard, addMember, removeMember} = require('../services/cards');
 
 const createCardForAList = async (req) => {
     let response = {};
     try {
         const {list_id} = req.body;
 
-        const getBoardIdForListResult = await getBoardIdForList(list_id);
-
-        if(getBoardIdForListResult.errorMessage) {
-            response = generateAPIResponse(getBoardIdForListResult.errorMessage);
-            return [getBoardIdForListResult.status, response];
-        }
-
-        const checkIfBoardMemberResult =await checkIfBoardMember(getBoardIdForListResult, req.userInfo.id);
+        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(list_id, 'list', req.userInfo.id);
 
         if(checkIfBoardMemberResult.errorMessage) {
             response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
@@ -44,16 +33,7 @@ const updateCardOfList = async (req) => {
     try {
         const {card_id} = req.params;
 
-        const getBoardIdOfCardResult = await getBoardIdOfCard(card_id);
-
-        if(getBoardIdOfCardResult.errorMessage) {
-            response = generateAPIResponse(getBoardIdOfCardResult.errorMessage);
-            return [getBoardIdOfCardResult.status, response];
-        }
-
-        const {board_id} = getBoardIdOfCardResult.list;
-
-        const checkIfBoardMemberResult = await checkIfBoardMember(board_id, req.userInfo.id);
+        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(card_id, 'card', req.userInfo.id);
 
         if(checkIfBoardMemberResult.errorMessage) {
             response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
@@ -79,23 +59,12 @@ const getCardDataOfList = async (req) => {
     let response = {};
     try {
         const {card_id} = req.params;
-        const getBoardIdOfCardResult = await getBoardIdOfCard(card_id);
-
-        if(getBoardIdOfCardResult.errorMessage) {
-            response = generateAPIResponse(getBoardIdOfCardResult.errorMessage);
-            return [getBoardIdOfCardResult.status, response];
-        }
-
-        const {board_id} = getBoardIdOfCardResult.list;
-
-        const checkIfBoardMemberResult = await checkIfBoardMember(board_id, req.userInfo.id);
+        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(card_id, 'card', req.userInfo.id);
 
         if(checkIfBoardMemberResult.errorMessage) {
             response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
             return [checkIfBoardMemberResult.status, response];
         }
-
-       
 
         const getCardResult = await getCard(card_id);
 
@@ -115,21 +84,13 @@ const deleteCardFromList = async (req) => {
     let response = {};
     try {
         const {card_id} = req.params;
-        const getBoardIdOfCardResult = await getBoardIdOfCard(card_id);
-
-        if(getBoardIdOfCardResult.errorMessage) {
-            response = generateAPIResponse(getBoardIdOfCardResult.errorMessage);
-            return [getBoardIdOfCardResult.status, response];
-        }
-
-        const {board_id} = getBoardIdOfCardResult.list;
-
-        const checkIfBoardMemberResult = await checkIfBoardMember(board_id, req.userInfo.id);
+        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(card_id, 'card', req.userInfo.id);
 
         if(checkIfBoardMemberResult.errorMessage) {
             response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
             return [checkIfBoardMemberResult.status, response];
         }
+
 
         const deleteCardResult = await deleteCard(card_id);
 
@@ -151,16 +112,7 @@ const addMemberToCard = async (req) => {
         const {card_id, user_id} = req.body;
         const createdBy = req.userInfo.id;
 
-        const getBoardIdOfCardResult = await getBoardIdOfCard(card_id);
-
-        if(getBoardIdOfCardResult.errorMessage) {
-            response = generateAPIResponse(getBoardIdOfCardResult.errorMessage);
-            return [getBoardIdOfCardResult.status, response];
-        }
-
-        const {board_id} = getBoardIdOfCardResult.list;
-
-        const checkIfBoardMemberResult = await checkIfBoardMember(board_id, req.userInfo.id);
+        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(card_id, 'card', req.userInfo.id);
 
         if(checkIfBoardMemberResult.errorMessage) {
             response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
@@ -185,21 +137,14 @@ const removeMemberFromCard = async(req) => {
     let response = {};
     try {
         const {card_id, user_id} = req.params;
-        const getBoardIdOfCardResult = await getBoardIdOfCard(card_id);
-
-        if(getBoardIdOfCardResult.errorMessage) {
-            response = generateAPIResponse(getBoardIdOfCardResult.errorMessage);
-            return [getBoardIdOfCardResult.status, response];
-        }
-
-        const {board_id} = getBoardIdOfCardResult.list;
-
-        const checkIfBoardMemberResult = await checkIfBoardMember(board_id, req.userInfo.id);
+        
+        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(card_id, 'card', req.userInfo.id);
 
         if(checkIfBoardMemberResult.errorMessage) {
             response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
             return [checkIfBoardMemberResult.status, response];
         }
+
         const removeMemberResult = await removeMember(card_id, user_id);
         
         if(removeMemberResult.errorMessage) {

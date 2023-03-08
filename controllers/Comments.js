@@ -1,12 +1,16 @@
-const { checkPayloadSchema, generateAPIResponse } = require("../common/helper")
-const { AddCommentSchema, UpdateCommentSchema } = require("../requestschema/CommentSchema");
-const { checkIfBoardMember } = require("../services/board");
-const { getBoardIdOfCard } = require("../services/cards");
+const { generateAPIResponse, checkIfUserIsBoardMember } = require("../common/helper")
 const { createComment, updateComment, deleteComment, getComments } = require("../services/comments")
 
 const createCommentOnCard = async (req) => {
     let response = {};
     try {
+        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(req.body.card_id, 'card', req.userInfo.id);
+
+        if(checkIfBoardMemberResult.errorMessage) {
+            response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
+            return [checkIfBoardMemberResult.status, response];
+        }
+
         const createCommentResult = await createComment(req.body, req.userInfo.id);
 
         if(createCommentResult.errorMessage) {
@@ -25,6 +29,13 @@ const  updateCommentOfCard = async (req) => {
     let response = {};
     try {
         const {comment_id} = req.params;
+
+        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(comment_id, 'comment', req.userInfo.id);
+
+        if(checkIfBoardMemberResult.errorMessage) {
+            response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
+            return [checkIfBoardMemberResult.status, response];
+        }
 
         const updateCommentResult = await updateComment(req.body, comment_id);
 
@@ -46,6 +57,13 @@ const deleteCommentOfCard = async(req) => {
     try {
         const {comment_id} = req.params;
 
+        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(comment_id, 'comment', req.userInfo.id);
+
+        if(checkIfBoardMemberResult.errorMessage) {
+            response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
+            return [checkIfBoardMemberResult.status, response];
+        }
+
         const deleteCommentResult = await deleteComment(comment_id);
 
         if(deleteCommentResult.errorMessage) {
@@ -64,6 +82,13 @@ const getCommentsOfCard = async(req) => {
     let response = {};
     try {
         const {card_id} = req.params;
+
+        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(card_id, 'card', req.userInfo.id);
+
+        if(checkIfBoardMemberResult.errorMessage) {
+            response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
+            return [checkIfBoardMemberResult.status, response];
+        }
 
         const getCommentsResult =await getComments(card_id);
 

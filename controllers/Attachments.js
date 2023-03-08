@@ -4,6 +4,13 @@ const { createAttachment, updateAttachment, deleteAttachment, getAttachments } =
 const createAttachmentForCard = async (req) => {
     let response = {};
     try {
+        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(req.body.card_id, 'card', req.userInfo.id);
+
+        if(checkIfBoardMemberResult.errorMessage) {
+            response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
+            return [checkIfBoardMemberResult.status, response];
+        }
+
         const createAttachementResult = await createAttachment(req.body, req.userInfo.id);
 
         if(createAttachementResult.errorMessage) {
@@ -22,6 +29,12 @@ const updateAttachmentOfCard = async(req) => {
     let response = {};
     try {
         const {attachmentId} = req.params;
+        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(attachmentId, 'attachment', req.userInfo.id);
+
+        if(checkIfBoardMemberResult.errorMessage) {
+            response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
+            return [checkIfBoardMemberResult.status, response];
+        }
         const updateAttachmentResult = await updateAttachment(req.body, attachmentId);
 
         if(updateAttachmentResult.errorMessage) {
@@ -40,6 +53,13 @@ const getAttachmentsOfCard = async (req) => {
     let response = {};
     try {
         const {cardId} = req.params;
+        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(cardId, 'card', req.userInfo.id);
+
+        if(checkIfBoardMemberResult.errorMessage) {
+            response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
+            return [checkIfBoardMemberResult.status, response];
+        }
+
         const getAttachmentsResult = await getAttachments(cardId);
 
         if(getAttachmentsResult.errorMessage) {
@@ -58,6 +78,14 @@ const deleteAttachmentOfCard = async (req) => {
     let response = {}
     try {
         const {attachmentId} = req.params;
+        
+        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(attachmentId, 'attachment', req.userInfo.id);
+
+        if(checkIfBoardMemberResult.errorMessage) {
+            response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
+            return [checkIfBoardMemberResult.status, response];
+        }
+
         const deleteAttachmentResult = await deleteAttachment(attachmentId);
 
         if(deleteAttachmentResult.errorMessage) {
