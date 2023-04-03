@@ -1,5 +1,5 @@
-const { generateAPIResponse } = require("../common/Helper");
-const { createAttachment, updateAttachment, deleteAttachment, getAttachments } = require("../services/attachments");
+const { generateAPIResponse, checkIfUserIsBoardMember } = require("../common/Helper");
+const { createAttachment, updateAttachment, deleteAttachment, getAttachments, checkIfAttachmentCreator } = require("../services/attachments");
 
 const createAttachmentForCard = async (req) => {
     let response = {};
@@ -29,12 +29,13 @@ const updateAttachmentOfCard = async(req) => {
     let response = {};
     try {
         const {attachmentId} = req.params;
-        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(attachmentId, 'attachment', req.userInfo.id);
+        const checkIfAttachmentCreatorResult = await checkIfAttachmentCreator(attachmentId, req.userInfo.id);
 
-        if(checkIfBoardMemberResult.errorMessage) {
-            response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
-            return [checkIfBoardMemberResult.status, response];
+        if(checkIfAttachmentCreatorResult.errorMessage) {
+            response = generateAPIResponse(checkIfAttachmentCreatorResult.errorMessage);
+            return [checkIfAttachmentCreatorResult.status, response];
         }
+
         const updateAttachmentResult = await updateAttachment(req.body, attachmentId);
 
         if(updateAttachmentResult.errorMessage) {
@@ -79,11 +80,11 @@ const deleteAttachmentOfCard = async (req) => {
     try {
         const {attachmentId} = req.params;
         
-        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(attachmentId, 'attachment', req.userInfo.id);
+        const checkIfAttachmentCreatorResult = await checkIfAttachmentCreator(attachmentId, req.userInfo.id);
 
-        if(checkIfBoardMemberResult.errorMessage) {
-            response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
-            return [checkIfBoardMemberResult.status, response];
+        if(checkIfAttachmentCreatorResult.errorMessage) {
+            response = generateAPIResponse(checkIfAttachmentCreatorResult.errorMessage);
+            return [checkIfAttachmentCreatorResult.status, response];
         }
 
         const deleteAttachmentResult = await deleteAttachment(attachmentId);

@@ -34,7 +34,7 @@ router.get('/verify/:token', async (req,res) => {
 
 router.get('/sendVerificationEmail', async (req, res) => {
     try {
-        const [status, response] = await sendVerificationEmail(req.headers.authorization)
+        const [status, response] = await sendVerificationEmail(req)
         res.status(status).json(response);
     } catch(error) {
         console.log(error);

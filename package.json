@@ -2,9 +2,9 @@
   "name": "thullo-backend",
   "version": "1.0.0",
   "description": "thullo web app backend",
-  "main": "server.js",
+  "main": "server.ts",
   "scripts": {
-    "start": "node server.js",
+    "watch": "tsc -w",
     "dev": "nodemon server.js"
   },
   "author": "Bhanu Teja",
@@ -20,6 +20,8 @@
     "sequelize": "^6.28.0"
   },
   "devDependencies": {
-    "nodemon": "^2.0.20"
+    "@types/node": "^18.15.11",
+    "nodemon": "^2.0.20",
+    "typescript": "^5.0.3"
   }
 }

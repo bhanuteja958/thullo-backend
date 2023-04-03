@@ -1,17 +1,15 @@
-const url = require('url'); 
 const { TOKEN_VERIFICATION_NOT_REQUIRED_URLS } = require("./common/constants");
 const { generateAPIResponse } = require("./common/helper");
 const { addMemberToCard } = require('./controllers/Cards');
 const { AddAttachemntSchema, UpdateAttachmentSchema } = require('./requestschema/AttachemntSchema');
 const { CreateBoardSchema, UpdateBoardSchema } = require('./requestschema/BoardSchema');
-const { CreateCardSchema, AddMemberSchema, UpdateCardSchema } = require('./requestschema/CardSchema');
+const { CreateCardSchema, UpdateCardSchema, AddMemberSchema } = require('./requestschema/CardSchema');
 const { AddCommentSchema, UpdateCommentSchema } = require('./requestschema/CommentSchema');
 const { AddLabelSchema, UpdateLabelSchema } = require('./requestschema/LabelSchema');
 const { CreateListSchema } = require('./requestschema/ListSchema');
 const { LoginSchema } = require('./requestschema/LoginSchema');
 const RegisterSchema = require('./requestschema/RegisterSchema');
 const { extractAndVerifyToken } = require("./services/jwttoken");
-const { getBoardIdForList } = require('./services/list');
 
 module.exports.accessTokenVerification = (req, res, next) => {
     if(!TOKEN_VERIFICATION_NOT_REQUIRED_URLS.includes(req.originalUrl)) {
@@ -19,10 +17,11 @@ module.exports.accessTokenVerification = (req, res, next) => {
     
         if(verifyTokenResult.errorMessage) {
             const response = generateAPIResponse(verifyTokenResult.errorMessage);
-            res.status(verifyTokenResult.status).json(response);
+            return res.status(verifyTokenResult.status).json(response);
         }
 
         req['userInfo'] = verifyTokenResult;
+
     }
 
     next();
@@ -61,7 +60,7 @@ const getPostAPIPayloadSchema = (url) => {
         case '/api/label/':
             return AddLabelSchema; 
         default:
-            return {};
+            return null;
     }
 }
 
@@ -78,7 +77,7 @@ const getPutAPIPayloadShema = (url) => {
         case /\/api\/label\/[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}\/?/.test(url):
             return UpdateLabelSchema;
         default:
-            return {};
+            return null;
     }
 }
 
@@ -97,17 +96,14 @@ module.exports.checkPayloadSchema = (req, res, next) => {
                 break;
         }
 
-        if (Object.keys(payloadSchema).length === 0) {
-            const response = generateAPIResponse('Not found the end point');
-            res.status(404).json(response);
-        } else {
+        if (payloadSchema) {
             const {error} = payloadSchema.validate(req.body);
             if(error) {
                 const response = generateAPIResponse(error.details[0].message);
-                res.status(400).json(response);
+                return res.status(400).json(response);
             }
         }
-    }    
+    }
 
-    next();
+    next()
 }

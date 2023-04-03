@@ -1,10 +1,10 @@
 const { generateAPIResponse, checkIfUserIsBoardMember} = require("../common/helper");
-const { createBoard, getBoards, getSingleBoard, updateSingleBoard, deleteBoard, addMember, removeMember, checkIfBoardAdmin } = require("../services/board");
+const { createBoard, getBoards, getSingleBoard, updateSingleBoard, deleteBoard, addMember, removeMember, checkIfBoardAdmin, checkIfBoardMember, checkIfAlreadyMember } = require("../services/board");
 
 const createUserBoard = async (req) => {
     let response = {};
     try {
-        req.body.user_id = req.userInfo.id;
+        req.body.userId = req.userInfo.id;
 
         const createBoardResult = await createBoard(req.body);
         
@@ -41,17 +41,17 @@ const getBoardsOfUser = async (req) => {
 
 const getBoardData = async (req) => {
     try {
-        const boardId = req.params.boardId
+        const boardId = req.params.boardId;
         const userId = req.userInfo.id;
 
-        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(boardId, 'board', req.userInfo.id);
+        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(boardId, 'board', userId);
 
         if(checkIfBoardMemberResult.errorMessage) {
             response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
             return [checkIfBoardMemberResult.status, response];
         }
 
-        const boardDataResult = await getSingleBoard(boardId, userId);
+        const boardDataResult = await getSingleBoard(boardId);
 
         if(boardDataResult.errorMessage) {
             response = generateAPIResponse(boardDataResult.errorMessage);
@@ -133,6 +133,13 @@ const addMemberToBoard = async (req) => {
         if(checkIfAdminResult.errorMessage) {
             response = generateAPIResponse(checkIfAdminResult.errorMessage);
             return [checkIfAdminResult.status, response];
+        }
+
+        const checkIfAlreadyMemberResult = await checkIfAlreadyMember(board_id, user_id);
+
+        if(checkIfAlreadyMemberResult.errorMessage) {
+            response = generateAPIResponse(checkIfAlreadyMemberResult.errorMessage);
+            return [checkIfAlreadyMemberResult.status, response];
         }
 
         const addMemberResult = await addMember(board_id, user_id);

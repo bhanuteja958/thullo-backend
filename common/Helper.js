@@ -4,6 +4,7 @@ const { checkIfBoardAdmin, checkIfBoardMember } = require('../services/board');
 const { getBoardIdOfCard } = require('../services/cards');
 const { getCommentCardId } = require('../services/comments');
 const { getLabelCardId } = require('../services/labels');
+const { getBoardIdForList } = require('../services/list');
 
 module.exports.checkPayloadSchema = (schema, payload) => {
     const {error} = schema.validate(payload);

@@ -47,6 +47,7 @@ const updateAttachment = async (attachementDataToBeUpdated, attachmentId) => {
 const getAttachments = async (cardId) => {
     try {
         const getAttachmentsResult = await Attachment.findAll({
+            attributes: ['id','card_id','created_by', 'attachment_url', 'created_on'],
             where: {
                 card_id: cardId,
             }
@@ -71,7 +72,7 @@ const deleteAttachment = async (attachmentId) => {
     try {   
         const deleteAttachmentResult = await Attachment.destroy({
             where: {
-                id: attachmentId
+                id: attachmentId,
             }
         });
 
@@ -116,10 +117,45 @@ const getAttachmentCardId = async (attachmentId) => {
     }
 }
 
+const checkIfAttachmentCreator = async (attachementId, userId) => {
+    try {
+        const checkIfAttachmentCreatorResult = await Attachment.findOne({
+            attributes: ['created_by'],
+            where: {
+                id: attachementId,
+            }
+        });
+    
+        if(!checkIfAttachmentCreatorResult) {
+            return  {
+                errorMessage: 'No attachemnt with the given id exists',
+                status: 400
+            };
+        }
+    
+        if(checkIfAttachmentCreatorResult.created_by === userId) {
+            return checkIfAttachmentCreatorResult;
+        } else {
+            return  {
+                errorMessage: 'You don\'t have permission to take this action',
+                status: 400
+            }
+        }
+    } catch(error) {
+        console.log('Error while checking attachment creator',error);
+        return {
+            errorMessage: 'Something went wrong',
+            status: 400
+        };
+    }
+    
+}
+
 module.exports = {
     createAttachment,
     updateAttachment,
     getAttachments,
     deleteAttachment,
-    getAttachmentCardId 
+    getAttachmentCardId,
+    checkIfAttachmentCreator
 }

@@ -1,5 +1,5 @@
 const { generateAPIResponse, checkIfUserIsBoardMember } = require("../common/Helper");
-const { createLabel, updateLabel, getLabels, deleteLabel } = require("../services/labels");
+const { createLabel, updateLabel, getLabels, deleteLabel, checkIfLabelCreator } = require("../services/labels");
 
 const createLabelForCard = async (req) => {
     let response = {};
@@ -30,11 +30,11 @@ const updateLabelOfCard = async(req) => {
     try {
         const {labelId} = req.params;
 
-        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(labelId, 'label', req.userInfo.id);
+        const checkIfLabelCreatorResult = await checkIfLabelCreator(labelId, req.userInfo.id);
 
-        if(checkIfBoardMemberResult.errorMessage) {
-            response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
-            return [checkIfBoardMemberResult.status, response];
+        if(checkIfLabelCreatorResult.errorMessage) {
+            response = generateAPIResponse(checkIfLabelCreatorResult.errorMessage);
+            return [checkIfLabelCreatorResult.status, response];
         }
 
         const updateLabelResult = await updateLabel(req.body, labelId);
@@ -80,11 +80,11 @@ const deleteLabelOfCard = async (req) => {
     let response = {}
     try {
         const {labelId} = req.params;
-        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(labelId, 'label', req.userInfo.id);
+        const checkIfLabelCreatorResult = await checkIfLabelCreator(labelId, req.userInfo.id);
 
-        if(checkIfBoardMemberResult.errorMessage) {
-            response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
-            return [checkIfBoardMemberResult.status, response];
+        if(checkIfLabelCreatorResult.errorMessage) {
+            response = generateAPIResponse(checkIfLabelCreatorResult.errorMessage);
+            return [checkIfLabelCreatorResult.status, response];
         }
         
         const deleteLabelResult = await deleteLabel(labelId);

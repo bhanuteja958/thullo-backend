@@ -122,10 +122,45 @@ const getCommentCardId = async (commentId) => {
     }
 }
 
+const checkIfCommentCreator = async (commentId, userId) => {
+    try {   
+        const checkIfCommentCreatorResult = await Comment.findOne({
+            attributes: ['created_by'],
+            where: {
+                id: commentId,
+            }
+        });
+    
+        if(!checkIfCommentCreatorResult) {
+            return  {
+                errorMessage: 'No attachemnt with the given id exists',
+                status: 400
+            };
+        }
+    
+        if(checkIfCommentCreatorResult.created_by === userId) {
+            return checkIfCommentCreatorResult;
+        } else {
+            return  {
+                errorMessage: 'You don\'t have permission to take this action',
+                status: 400
+            }
+        }
+    } catch(error) {
+        console.log('Error while checking  comment creator',error);
+        return {
+            errorMessage: 'Something went wrong',
+            status: 400
+        };
+    }
+    
+}
+
 module.exports = {
     createComment,
     updateComment,
     getComments,
     deleteComment,
-    getCommentCardId
+    getCommentCardId,
+    checkIfCommentCreator
 }

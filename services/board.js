@@ -1,15 +1,19 @@
+ const { QueryTypes } = require("sequelize");
 const { Board } = require("../models/Board.model");
 const { BoardUserMapping } = require("../models/BoardUserMapping.model");
 const { User } = require("../models/User.model");
+const { getDBConnection } = require("./database");
+
+const sequelize = getDBConnection();
 
 const createBoard = async (boardData) => {
     try {
         const createBoardResult = await Board.create({
             title: boardData.title,
-            cover_photo_url: boardData.cover_photo_url || '',
-            description: boardData.description || '',
-            visibility: boardData.visibility || 'public',
-            created_by: boardData.user_id
+            cover_photo_url: boardData.coverPhotoUrl || null,
+            description: boardData.description || null,
+            visibility: boardData.visibility || 'public', 
+            created_by: boardData.userId
         });
 
         return createBoardResult;
@@ -24,17 +28,18 @@ const createBoard = async (boardData) => {
 
 const getBoards = async( userId) => {
     try {
-        const boards = await Board.findAll({
-            attributes:['id','title','cover_photo_url','description','created_on','visibility'],
-            where: {
-                created_by: userId
-            },
-            order: [
-                ['created_on', 'DESC']
-            ]
+        const boards = await sequelize.query({
+            query: `
+                (SELECT b.id, b.title, b.cover_photo_url,b.description, b.created_on, b.visibility FROM boards b WHERE created_by = ? or b.id IN (SELECT board_id from board_user_mapping where user_id = ?) ORDER BY created_on DESC);
+            `,
+            values: [userId, userId]
+        }, {
+            type: QueryTypes.SELECT
         });
 
-        return boards
+        const [results, metadata] = boards
+
+        return results;
     } catch(error) {
         console.log('Error while fetching boards : ', error);
         return {
@@ -44,24 +49,25 @@ const getBoards = async( userId) => {
     }
 }
 
-const getSingleBoard = async (boardId, userId) => {
+const getSingleBoard = async (boardId) => {
     try{
-        const boardResult = await Board.findOne({
-            attributes:['id','title','cover_photo_url','description','created_on','visibility'],
-            where: {
-                created_by: userId,
-                id: boardId
-            }
+        const listsResult = await sequelize.query({
+            query: `
+                SELECT l.name, c.id,c.title, c.cover_photo_url, count(a.card_id) as attachments_count FROM list l LEFT JOIN card c on l.id = c.list_id LEFT JOIN attachments a on c.id = a.card_id where l.id in (SELECT * FROM list WHERE board_id = ?) GROUP BY a.card_id
+                UNION
+                SELECT l.name, c.id,c.title, c.cover_photo_url, count(co.card_id) as comments_count FROM list l LEFT JOIN card c on l.id = c.list_id LEFT JOIN comments co on c.id = co.card_id where l.id in (SELECT * FROM list WHERE board_id = ?) GROUP BY co.card_id
+            `,
+            values:[boardId, boardId],
         });
 
-        if(!boardResult) {
+        if(!listsResult) {
             return {
                 errorMessage: 'No board with the given id exists',
                 status: 400
             }
         }
 
-        return boardResult
+        return listsResult.results
     } catch(error) {
         console.log('Error while fetching board data: ', error);
         return {
@@ -188,7 +194,7 @@ const checkIfBoardAdmin = async(board_id, admin_id) => {
             return boardResult
         } else {
             return {
-                errorMessage: "You don't have permission to add/remove  members to/from the board",
+                errorMessage: "You don't have permission to take this action on the board",
                 status: 403,
             }
         }  
@@ -227,6 +233,31 @@ const checkIfBoardMember = async (board_id,user_id) => {
     }
 } 
 
+const checkIfAlreadyMember = async (board_id, user_id ) => {
+    try {
+        const checkIfAlreadyMemberResult = await BoardUserMapping.findOne({
+            where: {
+                user_id,
+                board_id,
+            }
+        });
+
+        if(checkIfAlreadyMemberResult) {
+            return {
+                errorMessage: 'User is already a member',
+                status: 200
+            }
+        }
+
+        return true;
+    } catch(error) {
+        console.log('Error while checking already board member: ', error);
+        return {
+            errorMessage: 'Something went wrong',
+            status: 400
+        }
+    }
+}
 module.exports = {
     createBoard,
     getBoards,
@@ -236,5 +267,6 @@ module.exports = {
     addMember,
     removeMember,
     checkIfBoardAdmin,
-    checkIfBoardMember
+    checkIfBoardMember,
+    checkIfAlreadyMember
 }

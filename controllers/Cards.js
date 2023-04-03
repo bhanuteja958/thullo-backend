@@ -1,5 +1,5 @@
 const {generateAPIResponse, checkIfUserIsBoardMember} = require('../common/helper');
-const { createCard, updateCard, getCard, deleteCard, addMember, removeMember} = require('../services/cards');
+const { createCard, updateCard, getCard, deleteCard, addMember, removeMember, checkIfCardMember} = require('../services/cards');
 
 const createCardForAList = async (req) => {
     let response = {};
@@ -117,6 +117,13 @@ const addMemberToCard = async (req) => {
         if(checkIfBoardMemberResult.errorMessage) {
             response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
             return [checkIfBoardMemberResult.status, response];
+        }
+
+        const checkIfCardMemberResult = await checkIfCardMember(card_id, user_id);
+
+        if(checkIfCardMemberResult.errorMessage) {
+            response = generateAPIResponse(checkIfCardMemberResult.errorMessage);
+            return [checkIfCardMemberResult.status, response];
         }
 
         const addMemberResult = await addMember(card_id, user_id, createdBy );

@@ -1,5 +1,5 @@
 const { generateAPIResponse, checkIfUserIsBoardMember } = require("../common/helper")
-const { createComment, updateComment, deleteComment, getComments } = require("../services/comments")
+const { createComment, updateComment, deleteComment, getComments, checkIfCommentCreator } = require("../services/comments")
 
 const createCommentOnCard = async (req) => {
     let response = {};
@@ -30,11 +30,11 @@ const  updateCommentOfCard = async (req) => {
     try {
         const {comment_id} = req.params;
 
-        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(comment_id, 'comment', req.userInfo.id);
+        const checkIfCommentCreatorResult = await checkIfCommentCreator(comment_id, req.userInfo.id);
 
-        if(checkIfBoardMemberResult.errorMessage) {
-            response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
-            return [checkIfBoardMemberResult.status, response];
+        if(checkIfCommentCreatorResult.errorMessage) {
+            response = generateAPIResponse(checkIfCommentCreatorResult.errorMessage);
+            return [checkIfCommentCreatorResult.status, response];
         }
 
         const updateCommentResult = await updateComment(req.body, comment_id);
@@ -57,11 +57,11 @@ const deleteCommentOfCard = async(req) => {
     try {
         const {comment_id} = req.params;
 
-        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(comment_id, 'comment', req.userInfo.id);
+        const checkIfCommentCreatorResult = await checkIfCommentCreator(comment_id, req.userInfo.id);
 
-        if(checkIfBoardMemberResult.errorMessage) {
-            response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
-            return [checkIfBoardMemberResult.status, response];
+        if(checkIfCommentCreatorResult.errorMessage) {
+            response = generateAPIResponse(checkIfCommentCreatorResult.errorMessage);
+            return [checkIfCommentCreatorResult.status, response];
         }
 
         const deleteCommentResult = await deleteComment(comment_id);
@@ -103,6 +103,8 @@ const getCommentsOfCard = async(req) => {
         console.log(error);
     }
 }
+
+
 
 module.exports = {
     createCommentOnCard,

@@ -114,7 +114,7 @@ const loginUser = async (loginData) => {
     }
 }
 
-const sendVerificationEmail = async () => {
+const sendVerificationEmail = async (req) => {
     let response = {};
     try {
         const tokenResult = await getUserToken(req.userInfo.email);
@@ -125,7 +125,7 @@ const sendVerificationEmail = async () => {
         }
 
         //send verification email
-        const sendVerifyEmailResult = await sendVerifyEmail(tokenResult, req.userInfo.email);
+        const sendVerifyEmailResult = await sendVerifyEmail(tokenResult.token, req.userInfo.email);
 
         if(sendVerifyEmailResult.errorMessage) {
             response = generateAPIResponse(sendVerifyEmailResult.errorMessage);

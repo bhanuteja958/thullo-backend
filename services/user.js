@@ -70,7 +70,7 @@ const getUserToken = async (email) => {
             }
         });
 
-        return userTokenResult.dataValues
+        return userTokenResult
     } catch(error) {
         console.log('Error while fetching user token : ',error);
         return {
@@ -82,21 +82,22 @@ const getUserToken = async (email) => {
 
 const checkUserToken =async (token) => {
     try {
-        const userTokenResult = await User.findOne({
-            attributes:['token'],
+        const userTokenResult = await User.update({
+            is_verified:1
+        },{
             where: {
                 token
             }
         });
 
-        if(!userTokenResult) {
+        if(userTokenResult[0] === 0) {
             return {
                 errorMessage: 'Not a valid token',
                 status: 400,
             }
         }
 
-        return userTokenResult.token
+        return userTokenResult
     } catch(error) {
         console.log('Error while checking user token : ',error);
         return {

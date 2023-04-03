@@ -119,10 +119,45 @@ const getLabelCardId = async (labelId) => {
     }
 }
 
+const checkIfLabelCreator = async (labelId, userId) => {
+    try {
+        const checkIfLabelCreatorResult = await Label.findOne({
+            attributes: ['created_by'],
+            where: {
+                id: labelId,
+            }
+        });
+    
+        if(!checkIfLabelCreatorResult) {
+            return  {
+                errorMessage: 'No label with the given id exists',
+                status: 400
+            };
+        }
+    
+        if(checkIfLabelCreatorResult.created_by === userId) {
+            return checkIfLabelCreatorResult;
+        } else {
+            return  {
+                errorMessage: 'You don\'t have permission to take this action',
+                status: 400
+            }
+        }
+    } catch(error) {
+        console.log('Error while checking label creator',error);
+        return {
+            errorMessage: 'Something went wrong',
+            status: 400
+        };
+    }
+    
+}
+
 module.exports = {
     createLabel,
     updateLabel,
     getLabels,
     deleteLabel,
-    getLabelCardId
+    getLabelCardId,
+    checkIfLabelCreator
 }

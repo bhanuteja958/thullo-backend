@@ -10,11 +10,11 @@ const createListForBoard = async(req) => {
     try {
         const {name, board_id} = req.body;
 
-        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(board_id, 'board', req.userInfo.id);
+        const checkIfAdminResult = await checkIfBoardAdmin(board_id, req.userInfo.id);
 
-        if(checkIfBoardMemberResult.errorMessage) {
-            response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
-            return [checkIfBoardMemberResult.status, response];
+        if(checkIfAdminResult.errorMessage) {
+            response = generateAPIResponse(checkIfAdminResult.errorMessage);
+            return [checkIfAdminResult.status, response];
         }
 
         const createListResult = await createList(name, board_id, req.userInfo.id);
@@ -38,11 +38,18 @@ const updateListOfBoard = async (req) => {
         const {name} = req.body;
         const {list_id} = req.params;
 
-        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(list_id, 'list', req.userInfo.id);
+        const getBoardIdForListResult = await getBoardIdForList(list_id);
 
-        if(checkIfBoardMemberResult.errorMessage) {
-            response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
-            return [checkIfBoardMemberResult.status, response];
+        if(getBoardIdForListResult.errorMessage) {
+            response = generateAPIResponse(getBoardIdForListResult.errorMessage);
+            return [getBoardIdForListResult.status, response];
+        }
+
+        const checkIfAdminResult = await checkIfBoardAdmin(getBoardIdForListResult, req.userInfo.id);
+
+        if(checkIfAdminResult.errorMessage) {
+            response = generateAPIResponse(checkIfAdminResult.errorMessage);
+            return [checkIfAdminResult.status, response];
         }
 
         const updateListResult = await updateList(name, list_id);
@@ -63,11 +70,18 @@ const deleteListFromBoard = async(req) => {
     try {
         const {list_id} = req.params;
 
-        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(list_id, 'list', req.userInfo.id);
+        const getBoardIdForListResult = await getBoardIdForList(list_id);
 
-        if(checkIfBoardMemberResult.errorMessage) {
-            response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
-            return [checkIfBoardMemberResult.status, response];
+        if(getBoardIdForListResult.errorMessage) {
+            response = generateAPIResponse(getBoardIdForListResult.errorMessage);
+            return [getBoardIdForListResult.status, response];
+        }
+
+        const checkIfAdminResult = await checkIfBoardAdmin(getBoardIdForListResult, req.userInfo.id);
+
+        if(checkIfAdminResult.errorMessage) {
+            response = generateAPIResponse(checkIfAdminResult.errorMessage);
+            return [checkIfAdminResult.status, response];
         }
 
         const deleteListResult = await deleteList(list_id);

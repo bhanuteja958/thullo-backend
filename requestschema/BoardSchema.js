@@ -2,7 +2,7 @@ const joi = require('joi');
 
 const CreateBoardSchema = joi.object({
     title: joi.string().required(),
-    cover_photo_url: joi.string().allow(''),
+    coverPhotoUrl: joi.string().allow(''),
     description: joi.string().allow(''),
     visibility: joi.string().valid('public','private') 
 });

@@ -87,7 +87,7 @@ const updateCard = async (card_id, cardValuesToBeUpdated, user_id) => {
             }
         }
 
-        return updateCardResult
+        return updateCardResult;
     } catch(error) {
         console.log('Error while updating card: ',error);
         return {
@@ -111,6 +111,7 @@ const deleteCard = async (card_id) => {
                 status: 400
             }
         }
+        return deleteCardResult;
     } catch(error) {
         console.log('Error while delete card: ', error);
         return {
@@ -164,6 +165,33 @@ const removeMember = async (card_id, user_id) => {
     }
 }
 
+const checkIfCardMember = async (card_id, user_id) => {
+    try {
+        const checkIfCardMemberResult = await CardUserMapping.findOne({
+            attributes:['id'],
+            where:{
+                card_id,
+                user_id
+            }
+        });
+
+        if(checkIfCardMemberResult) {
+            return {
+                errorMessage: "User already is a member of card",
+                status: 400
+            }
+        }
+
+        return true
+    } catch(error) {
+        console.log('Error while checking member of card: ', error);
+        return {
+            errorMessage: 'Something went wrong',
+            status: 400,
+        }
+    }
+}
+
 module.exports = {
     createCard,
     getCard,
@@ -171,5 +199,6 @@ module.exports = {
     deleteCard,
     addMember,
     removeMember,
-    getBoardIdOfCard
+    getBoardIdOfCard,
+    checkIfCardMember
 }

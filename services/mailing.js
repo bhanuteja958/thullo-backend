@@ -14,8 +14,11 @@ const sendVerifyEmail = async (token, email) => {
     try{
         const verficationLink = `http://localhost:5000/verify/${token}`
         html = `
-            <h2>Verify your email</h2>
-            <a href=${verficationLink} target="_blank">${verficationLink}</a>
+            <div style="text-align:center; padding :2rem; background-color: #F8F9FD;box-sizing:border-box">
+                <h1 style="margin:0; padding:0;box-sizing: border-box; margin-bottom:1rem">Thullo</h1>
+                <h2 style="margin:0; padding:0;box-sizing: border-box; margin-bottom:1rem">Verify your email for loggining into Thullo</h2>
+                <a href=${verficationLink} target="_blank" style="background-color:#2F80ED;text-decoration:none;color: white;font-weight:bold;padding:0.5rem;border-radius:0.2rem">Verfiy Email</a>
+            </div>
         `
 
         const sendEmailResult = await transporter.sendMail({
@@ -24,6 +27,8 @@ const sendVerifyEmail = async (token, email) => {
             subject: 'Email Verification',
             html
         });
+
+        console.log(sendEmailResult);
 
         return sendEmailResult
     } catch (error) {
