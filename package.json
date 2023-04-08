@@ -1,6 +1,7 @@
 {
   "name": "thullo-backend",
   "version": "1.0.0",
+  "type": "module",
   "description": "thullo web app backend",
   "main": "server.ts",
   "scripts": {
@@ -20,6 +21,7 @@
     "sequelize": "^6.28.0"
   },
   "devDependencies": {
+    "@types/express": "^4.17.17",
     "@types/node": "^18.15.11",
     "nodemon": "^2.0.20",
     "typescript": "^5.0.3"
