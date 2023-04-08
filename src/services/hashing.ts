@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import { generateServiceResponse } from '../common/helper.js';
 import { User } from '../models/User.model.js';
 
 
@@ -6,13 +7,20 @@ export const hashPassword = async (password) => {
     try {
         const salt = await bcrypt.genSalt()
         const hashedPassword = await bcrypt.hash(password, salt)
-        return hashedPassword;
+        return generateServiceResponse(
+            200,
+            false,
+            "Successfully hashed password",
+            {
+                hashedPassword
+            }
+        )
     } catch(error) {
-        console.log('Error while hashing password: ', error);
-        return {
-            errorMessage: 'Something went wrong',
-            status: 500
-        }
+        return generateServiceResponse(
+            500,
+            true,
+            error.message
+        )
     }
 } 
 
@@ -27,23 +35,31 @@ export const comparePasswords = async (userEnteredEmail, userEnteredPassword) =>
         });
 
         if(!queryResult.password) {
-            return {
-                arePasswordsSame: false,
-                message: 'Invalid email/password'
-            }
+            return generateServiceResponse(
+                200,
+                false,
+                'Invalid email/password',
+                {
+                    arePasswordsSame: false
+                }
+            )
         }
 
         const arePasswordsSame = await bcrypt.compare(userEnteredPassword, queryResult.password);
 
-        return {
-            arePasswordsSame,
-            message: arePasswordsSame ? '' : 'Invalid email/password'
-        }
+        return generateServiceResponse(
+            200,
+            false,
+            arePasswordsSame ?  'Passwords match succesfully': 'Invalid email/password',
+            {
+                arePasswordsSame
+            }
+        )
     } catch(error) {
-        console.log('Unable to query DB: ',error);
-        return {
-            errorMessage: 'Something went wrong',
-            status:500
-        };
+        return generateServiceResponse(
+            500,
+            true,
+            error.message
+        )
     }
 } 

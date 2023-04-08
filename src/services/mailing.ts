@@ -1,4 +1,5 @@
 import  nodemailer from 'nodemailer'
+import { generateServiceResponse } from '../common/helper.js';
 
 
 export const transporter = nodemailer.createTransport({
@@ -12,7 +13,7 @@ export const transporter = nodemailer.createTransport({
 });
 
 
-export const sendVerifyEmail = async (token, email) => {
+export const sendVerifyEmail = async (token:string, email:string) => {
     try{
         const verficationLink = `http://localhost:5000/verify/${token}`
         const html = `
@@ -30,14 +31,16 @@ export const sendVerifyEmail = async (token, email) => {
             html
         });
 
-        console.log(sendEmailResult);
-
-        return sendEmailResult
+        return generateServiceResponse(
+            sendEmailResult ? 200: 500 ,
+            false,
+            sendEmailResult ? "Successfully sent verification email" : "Something went wrong while sending email",
+        )
     } catch (error) {
-        console.log('Error while sending email:', error);
-        return {
-            errorMessage: error.message,
-            status: 400
-        }
+        return generateServiceResponse(
+            500,
+            true,
+            error.message
+        )
     }   
 }

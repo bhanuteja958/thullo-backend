@@ -2,92 +2,110 @@ import { generateServiceResponse } from "../common/helper.js";
 import { User } from "../models/User.model.js";
 
 
-export const checkIfUserWithEmailExists = async (email) => {
+export const checkIfUserWithEmailExists = async (email:string) => {
     try{
         const user = await User.findOne({
             attributes: ['id'],
             where: {
                 email: email
             }
-        });
+        }); 
 
-        return {
-            isEmailAlreadyExists: user ? true : false,
-            message: user ? 'A user with the given email already exists' : 'Invalid Email/Password'
-        }
-        
+        return generateServiceResponse(
+            200,
+            false,
+            user ? 'A user with the given email already exists' : 'Invalid Email/Password',
+            {
+                isEmailAlreadyExists: user ? true : false,
+            },
+        );
     } catch(error) {
-        console.log('Unable to query DB: ',error);
-        return {
-           status: 500,
-           errorMessage: 'Something went wrong',
-        }
+        return generateServiceResponse(
+            500,
+            true,
+            error.message
+        )
     }
-    
 }
 
 
-export const createUser = async (userDetails) => {
+export const createUser = async (email: string, first_name:string, last_name: string, hashedPassword: string, token: string) => {
     try {
-        const {email, first_name, last_name, hashedPassword, token} = userDetails;
         const user = await User.create({
             first_name,
             last_name,
             email,
             password: hashedPassword,
             token 
-        })
-        return user
+        });
+
+        return generateServiceResponse(
+            200,
+            false,
+            "Successfully created user",
+            user.dataValues
+        );
+
     } catch (error) {
-        console.log('Error while creating user: ', error);
-        return {
-            errorMessage: 'Something went wrong',
-            status: 500
-        }
+        return generateServiceResponse(
+            500,
+            true,
+            error.message
+        );
     }
 }
 
 
-export const getUser = async (email) => {
+export const getUser = async (email:string) => {
     try {
         const user = await User.findOne({
-            attributes: ['id','first_name', 'last_name'],
+            attributes: ['id','first_name', 'last_name', 'is_verified'],
             where: {
                 email
             }
         })
-        return user.dataValues
+        return generateServiceResponse(
+            200,
+            false,
+            user ? "Successfully fetched user" : 'No such user exists',
+            user ? user.dataValues : null
+        )
     } catch(error) {
-        console.log('Error while fetching user details : ',error);
-        return {
-            errorMessage: 'something went wrong',
-            status: 500
-        }
+        return generateServiceResponse(
+            500,
+            true,
+            error.message
+        )
     }
 }
 
 
-export const getUserToken = async (email) => {
+export const getUserToken = async (email:string) => {
     try {
-        const userTokenResult = await User.findOne({
+        const userToken = await User.findOne({
             attributes:['token'],
             where: {
                 email
             }
         });
 
-        return userTokenResult
+        return generateServiceResponse(
+            200,
+            false,
+            userToken ? "successfully feched user token" : 'No user token exists for the given email',
+            userToken ? userToken.dataValues.token : null
+        )
     } catch(error) {
-        console.log('Error while fetching user token : ',error);
-        return {
-            errorMessage: 'something went wrong',
-            status: 500
-        }
+        return generateServiceResponse(
+            500,
+            true,
+            error.message
+        )
     }
 }
 
 
-export const checkUserToken =async (token) => {
+export const checkUserToken =async (token:string) => {
     try {
         const userTokenResult = await User.update({
             is_verified:1
@@ -97,19 +115,16 @@ export const checkUserToken =async (token) => {
             }
         });
 
-        if(userTokenResult[0] === 0) {
-            return {
-                errorMessage: 'Not a valid token',
-                status: 400,
-            }
-        }
-
-        return userTokenResult
+        return generateServiceResponse(
+            200,
+            false,
+            userTokenResult[0] === 0 ? 'Not a valid token' : 'Successfully verified User'
+        );
     } catch(error) {
-        console.log('Error while checking user token : ',error);
-        return {
-            errorMessage: 'something went wrong',
-            status: 500
-        }
+        return generateServiceResponse(
+            500,
+            true,
+            error.message
+        )
     }
 }

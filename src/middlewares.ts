@@ -1,5 +1,6 @@
 import { TOKEN_VERIFICATION_NOT_REQUIRED_URLS } from "./common/constants.js";
 import { generateAPIResponse } from "./common/helper.js";
+import { ServiceResponse } from "./common/types.js";
 import {AddAttachemntSchema, UpdateAttachmentSchema} from './requestschema/AttachemntSchema.js'
 import { AddMemberSchema, CreateBoardSchema, UpdateBoardSchema } from "./requestschema/BoardSchema.js";
 import { CreateCardSchema, UpdateCardSchema } from "./requestschema/CardSchema.js";
@@ -13,14 +14,14 @@ import { extractAndVerifyToken } from "./services/jwttoken.js";
 
 export const accessTokenVerification = (req, res, next) => {
     if(!TOKEN_VERIFICATION_NOT_REQUIRED_URLS.includes(req.originalUrl)) {
-        const verifyTokenResult = extractAndVerifyToken(req.headers?.authorization);
+        const verifyTokenResult:ServiceResponse = extractAndVerifyToken(req.headers?.authorization);
     
-        if(verifyTokenResult.errorMessage) {
-            const response = generateAPIResponse(verifyTokenResult.errorMessage);
+        if(verifyTokenResult.isError) {
+            const response = generateAPIResponse(verifyTokenResult.message);
             return res.status(verifyTokenResult.status).json(response);
         }
 
-        req['userInfo'] = verifyTokenResult;
+        req.body.userInfo = verifyTokenResult.data;
 
     }
 

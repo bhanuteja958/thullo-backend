@@ -29,8 +29,9 @@ export const generateAPIResponse = (message:string,success:boolean=false, data:a
     }
 }
 
-export const generateServiceResponse = (isError: boolean, message: string, data:any={}) => {
+export const generateServiceResponse = (status:number,isError: boolean, message: string, data:any={},) => {
     return {
+        status,
         isError,
         message,
         data
@@ -38,7 +39,7 @@ export const generateServiceResponse = (isError: boolean, message: string, data:
 }
 
 export const generateRandomString = () => {
-    const randomstring = crypto.randomBytes(20).toString('hex');
+    const randomstring:string = crypto.randomBytes(20).toString('hex');
     return randomstring;
 }
 
