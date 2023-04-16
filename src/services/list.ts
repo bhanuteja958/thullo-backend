@@ -1,96 +1,109 @@
+import { generateServiceResponse } from "../common/helper.js";
 import { List } from "../models/List.model.js";
 
 
-export const createList = async (list_name, board_id, user_id) => {
+export const createList = async (listName:string, boardId:string, userId:string) => {
     try {
         const createListResult = await List.create({
-            name: list_name,
-            board_id,
-            created_by: user_id,
-        })
+            name: listName,
+            board_id: boardId,
+            created_by: userId,
+        });
 
-        return createListResult
-    } catch(error) {
-        console.log('Error while creating list: ', error);
-        return {
-            errorMessage: 'Error while creating list',
-            status: 400
+        if(!createListResult) {
+            return generateServiceResponse(
+                400,
+                true,
+                "Something went wrong",
+            );
         }
+
+        return generateServiceResponse(
+            200,
+            false,
+            "Successfully created list"
+        );
+    } catch(error) {
+        throw error
     }
 }
 
 
-export const updateList = async (new_list_name, list_id) => {
+export const updateList = async (newListName:string, listId:string) => {
     try {
         const updateListResult = await List.update({
-            name: new_list_name,
+            name: newListName,
         }, {
             where: {
-                id: list_id
+                id: listId
             }
         })
 
         if(updateListResult[0] === 0) {
-            return {
-                errorMessage: 'No list with the given id exists',
-                status: 400
-            }
+            return generateServiceResponse(
+                400,
+                true,
+                'No list with the given id exists'
+            );
         }
 
-        return updateListResult[0]
+        return generateServiceResponse(
+            200,
+            false,
+            'Successfully updated list'
+        );
     } catch(error) {
-        console.log('Error while updating list: ', error);
-        return {
-            errorMessage: 'Error while updating list',
-            status: 400
-        }
+        throw error;
     }
 }
 
 
-export const deleteList = async (list_id) => {
+export const deleteList = async (listId:string) => {
     try{
         const deleteListResult = await List.destroy({
             where: {
-                id: list_id
+                id: listId
             }
         })
 
         if(deleteListResult === 0) {
-            return {
-                errorMessage: 'No list with the given id exists',
-                status: 400
-            }
+            return generateServiceResponse(
+                400,
+                true,
+                'No list with the given id exists',  
+            )
         }
 
-        return deleteListResult
+        return generateServiceResponse(
+            200,
+            false,
+            'Successfully deleted list'
+        );
     } catch(error) {
-        console.log('Error while deleting list: ', error);
-        return {
-            errorMessage: 'Error while deleting list',
-            status: 400
-        }
+        throw error;
     }
 }
 
 
-export const getBoardIdForList = async (list_id) => {
+export const getBoardIdForList = async (listId:string) => {
     try {
-        const boardIdForList:any = await List.findByPk(list_id, {
+        const boardIdForList:any = await List.findByPk(listId, {
             attributes:['board_id']
         });
         if(!boardIdForList) {
-            return {
-                errorMessage: 'No list with the given id exists',
-                status: 400,
-            }
+            return generateServiceResponse(
+                400,
+                true,
+                'No list with the given id exists',  
+            )
         }
-        return boardIdForList.board_id
+        return generateServiceResponse(
+            200,
+            false,
+            'successfully fetched boardId',
+            boardIdForList.dataValues.board_id
+        );
     } catch(error) {
-        console.log('Error while getting board_id of list: ', error);
-        return {
-            errorMessage: 'Something went wrong',
-            status: 400
-        }
+        throw error;
     }
 }
