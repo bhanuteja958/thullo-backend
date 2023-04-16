@@ -5,6 +5,7 @@ import { getBoardIdOfCard } from '../services/cards.js';
 import { getCommentCardId } from '../services/comments.js';
 import { getLabelCardId } from '../services/labels.js';
 import { getBoardIdForList } from '../services/list.js';
+import { ServiceResponse } from './types.js';
 
 export const checkPayloadSchema = (schema:any, payload:any) => {
     const {error} = schema.validate(payload);
@@ -77,32 +78,28 @@ export const checkIfUserIsBoardMember = async (id:any, idType:any, userId:any) =
         }
 
         if (idType === 'list') {
-            const boardIdResult = await getBoardIdForList(pkId);
-            if(boardIdResult.errorMessage) {
+            const boardIdResult:ServiceResponse = await getBoardIdForList(pkId);
+            if(boardIdResult.isError) {
                 return boardIdResult;
             }
 
             pkId = boardIdResult;
         }
 
-        const checkIfBoardAdminResult = await checkIfBoardAdmin(pkId, userId);
+        const checkIfBoardAdminResult:ServiceResponse = await checkIfBoardAdmin(pkId, userId);
 
-        if(!checkIfBoardAdminResult.errorMessage) {
+        if(!checkIfBoardAdminResult.isError) {
             return true;
         } else {
-            const checkIfBoardMemberResult:any = await checkIfBoardMember(pkId, userId);
+            const checkIfBoardMemberResult:ServiceResponse = await checkIfBoardMember(pkId, userId);
 
-            if(checkIfBoardMemberResult.errorMessage) {
+            if(checkIfBoardMemberResult.isError) {
                 return checkIfBoardMemberResult;
             } else {
                 return true
             }
         }
     } catch(error) {
-        console.log("Error while checking if board member:", error);
-        return {
-            errorMessage: "Something went wrong",
-            status: 400
-        };
+        throw error;
     }
 }
