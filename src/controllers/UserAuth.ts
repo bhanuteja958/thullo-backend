@@ -64,13 +64,7 @@ export const registerUser = async (req: Request) => {
             }
         }
     } catch(error) {
-       return {
-            status: 500,
-            response: generateAPIResponse(
-                error.message,
-                true,
-            )
-       }
+        throw error;
     }
     
 }
@@ -149,13 +143,7 @@ export const loginUser = async (req:Request) => {
         }
 
     } catch(error) {
-        return {
-            status: 500,
-            response: generateAPIResponse(
-                error.message,
-                true,
-            )
-       }
+        throw error;
     }
 }
 
@@ -189,13 +177,7 @@ export const sendVerificationEmail = async (req:Request) => {
             response: generateAPIResponse('Verfication email successfully sent', true)
         }
     } catch(error) {
-        return {
-            status: 500,
-            response: generateAPIResponse(
-                error.message,
-                true,
-            )
-       }
+        throw error;
     }
 }
 
@@ -220,12 +202,6 @@ export const verifyUserToken = async (req:Request) => {
             response
         }
     } catch(error) {
-        return {
-            status: 500,
-            response: generateAPIResponse(
-                error.message,
-                true,
-            )
-       }
+        throw error;
     }
 }

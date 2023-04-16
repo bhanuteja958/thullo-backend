@@ -25,13 +25,7 @@ export const createUserBoard = async (req: Request) => {
             response
         }
     } catch (error) {
-        return {
-            status: 500,
-            response: generateAPIResponse(
-                error.message,
-                true,
-            )
-       }
+        throw error;
     }
 }
 
@@ -56,13 +50,7 @@ export const getBoardsOfUser = async (req:Request) => {
             response
         }
     } catch (error) {
-        return {
-            status: 500,
-            response: generateAPIResponse(
-                error.message,
-                true,
-            )
-       }
+        throw error;
     }
 }
 
@@ -98,13 +86,7 @@ export const getBoardData = async (req:Request) => {
             response
         }
     } catch(error) {
-        return {
-            status: 500,
-            response: generateAPIResponse(
-                error.message,
-                true,
-            )
-       }
+        throw error;
     }
 }   
 
@@ -142,13 +124,7 @@ export const updateBoardData = async (req:Request) => {
             response
         }
     } catch(error) {
-        return {
-            status: 500,
-            response: generateAPIResponse(
-                error.message,
-                true,
-            )
-       }
+        throw error;
     }
 }
 
@@ -186,13 +162,7 @@ export const deleteBoardData = async (req:Request) => {
         }
 
     } catch(error) {
-        return {
-            status: 500,
-            response: generateAPIResponse(
-                error.message,
-                true,
-            )
-       }
+        throw error;
     }   
 }
 
@@ -238,13 +208,7 @@ export const addMemberToBoard = async (req:Request) => {
             response
         }
     } catch(error) {
-        return {
-            status: 500,
-            response: generateAPIResponse(
-                error.message,
-                true,
-            )
-       }
+        throw error;
     }
 }
 
@@ -282,12 +246,6 @@ export const removeMemberFromBoard = async (req:Request) => {
             response
         }
     } catch(error) {
-        return {
-            status: 500,
-            response: generateAPIResponse(
-                error.message,
-                true,
-            )
-       }
+        throw error;
     }
 }

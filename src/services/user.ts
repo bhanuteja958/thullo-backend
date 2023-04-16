@@ -20,11 +20,7 @@ export const checkIfUserWithEmailExists = async (email:string) => {
             },
         );
     } catch(error) {
-        return generateServiceResponse(
-            500,
-            true,
-            error.message
-        )
+        throw error;
     }
 }
 
@@ -47,11 +43,7 @@ export const createUser = async (email: string, first_name:string, last_name: st
         );
 
     } catch (error) {
-        return generateServiceResponse(
-            500,
-            true,
-            error.message
-        );
+        throw error;
     }
 }
 
@@ -71,11 +63,7 @@ export const getUser = async (email:string) => {
             user ? user.dataValues : null
         )
     } catch(error) {
-        return generateServiceResponse(
-            500,
-            true,
-            error.message
-        )
+        throw error;
     }
 }
 
@@ -96,11 +84,7 @@ export const getUserToken = async (email:string) => {
             userToken ? userToken.dataValues.token : null
         )
     } catch(error) {
-        return generateServiceResponse(
-            500,
-            true,
-            error.message
-        )
+        throw error;
     }
 }
 
@@ -121,10 +105,6 @@ export const checkUserToken =async (token:string) => {
             userTokenResult[0] === 0 ? 'Not a valid token' : 'Successfully verified User'
         );
     } catch(error) {
-        return generateServiceResponse(
-            500,
-            true,
-            error.message
-        )
+        throw error;
     }
 }

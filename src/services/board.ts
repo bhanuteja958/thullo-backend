@@ -23,11 +23,7 @@ export const createBoard = async (title: string, cover_photo_url: string, descri
             createBoardResult.dataValues
         );
     } catch (error) {
-        return generateServiceResponse(
-            500,
-            true,
-            error.message
-        )
+        throw error;
     }
 }
 
@@ -60,11 +56,7 @@ export const getBoards = async(loggedInUserId: string) => {
             results
         )
     } catch(error) {
-        return generateServiceResponse(
-            500,
-            true,
-            error.message
-        )
+        throw error;
     }
 }
 
@@ -97,11 +89,7 @@ export const getSingleBoard = async (boardId:string) => {
             results
         )
     } catch(error) {
-        return generateServiceResponse(
-            500,
-            true,
-            error.message
-        )
+        throw error;
     }
 }
 
@@ -131,11 +119,7 @@ export const updateSingleBoard = async (boardId:string, loggedInUserId:string, b
             "Successfully updated board"
         )
     } catch(error) {
-        return generateServiceResponse(
-            500,
-            true,
-            error.message
-        )
+        throw error;
     }
 }
 
@@ -162,11 +146,7 @@ export const deleteBoard = async (boardId:string, loggedInUserId: string) => {
             "Successfully deleted board"
         )
     } catch(error) {
-        return generateServiceResponse(
-            500,
-            true,
-            error.message
-        )
+        throw error;
     }       
 }
 
@@ -184,11 +164,7 @@ export const addMember = async (boardId:string, userId: string) => {
             addMemberResult.dataValues
         )
     } catch(error) {
-        return generateServiceResponse(
-            500,
-            true,
-            error.message
-        )
+        throw error;
     }
 }
 
@@ -215,11 +191,7 @@ export const removeMember = async (boardId: string, userId:string) => {
             "Successfully removed user from the board"
         )
     } catch(error) {
-        return generateServiceResponse(
-            500,
-            true,
-            error.message
-        )
+        throw error;
     }
 }
 
@@ -255,11 +227,7 @@ export const checkIfBoardAdmin = async(boardId:string, adminId:string) => {
             )
         }  
     } catch(error) {
-        return generateServiceResponse(
-            500,
-            true,
-            error.message
-        )
+        throw error;
     }
 }
 
@@ -286,11 +254,7 @@ export const checkIfBoardMember = async (boardId:string, userId: string) => {
             "User is a board member"
         )
     } catch(error) {
-        return generateServiceResponse(
-            500,
-            true,
-            error.message
-        )
+        throw error;
     }
 } 
 
@@ -323,10 +287,6 @@ export const checkIfAlreadyMember = async (boardId:string, userId:string ) => {
             }
         )
     } catch(error) {
-        return generateServiceResponse(
-            500,
-            true,
-            error.message
-        )
+        throw error;
     }
 }
