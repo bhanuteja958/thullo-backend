@@ -1,7 +1,8 @@
+import { generateServiceResponse } from "../common/helper.js";
 import { Comment } from "../models/Comment.model.js";
 
 
-export const createComment = async (commentData, userId) => {
+export const createComment = async (commentData:any, userId:string) => {
     try {
         const createCommentResult = await Comment.create({
             ...commentData,
@@ -9,23 +10,24 @@ export const createComment = async (commentData, userId) => {
         })
     
         if(!createCommentResult) {
-            return {
-                errorMesssage: 'Error while creating comment',
-                status: 400
-            }
+            return generateServiceResponse(
+                400,
+                true,
+                'Error while creating comment'
+            );
         }
-        return createCommentResult;
+        return generateServiceResponse(
+            200,
+            false,
+            "Successfully created comment"
+        );
     } catch(error) {
-        console.log("Error while creating comment: ", error);
-        return {
-            errorMessage: 'Error while creating comment',
-            status:400,
-        }
+        throw error;
     }
 }
 
 
-export const getComments = async (cardId) => {
+export const getComments = async (cardId:string) => {
     try {       
         const getCommentsResult = await Comment.findAll({
             attributes:['id','content','created_on'],
@@ -34,24 +36,26 @@ export const getComments = async (cardId) => {
             }
         });
         if(!getCommentsResult) {
-            return {
-                errorMessage: 'No commments for this card',
-                status: 400,
-            }
+            return generateServiceResponse(
+                400,
+                true,
+                'No commments for this card'
+            )
         }
-        return getCommentsResult;
+        return generateServiceResponse(
+            200,
+            false,
+            "Successfully fetched comments",
+            getCommentsResult
+        )
     } catch(error) {
-        console.log("Error while getting comments: ", error);
-        return {
-            errorMessage: 'Error while getting comments',
-            status:400,
-        }
+        throw error;
     }
     
 }
 
 
-export const updateComment = async(commentUpdateData, commentId) => {
+export const updateComment = async(commentUpdateData:any, commentId:string) => {
     try {
         const updateCommentResult = await Comment.update({
             ...commentUpdateData
@@ -62,23 +66,25 @@ export const updateComment = async(commentUpdateData, commentId) => {
         })  
 
         if(updateCommentResult[0] === 0) {
-            return {
-                errorMessage: 'No comment with the given id exsits',
-                status: 400,
-            }
+            return generateServiceResponse(
+                400,
+                false,
+                'No comment with the given id exsits'
+            );
         }
-        return updateCommentResult
+
+        return generateServiceResponse(
+            200,
+            false,
+            "Successfully updated comment"
+        );
     } catch(error) {
-        console.log("Error while updating comment: ", error);
-        return {
-            errorMessage: 'Error while updating comment',
-            status:400,
-        }
+        throw error;
     }
 }
 
 
-export const deleteComment = async(commentId) => {
+export const deleteComment = async(commentId:string) => {
     try {
         const deleteCommentResult = await Comment.destroy({
             where: {
@@ -87,23 +93,24 @@ export const deleteComment = async(commentId) => {
         });
 
         if(deleteCommentResult === 0) {
-            return {
-                errorMessage: 'No Comment with the given id exists',
-                status: 400
-            }
+            return generateServiceResponse(
+                400,
+                true,
+                'No Comment with the given id exists'
+            );
         }
-        return deleteCommentResult;
+        return generateServiceResponse(
+            200,
+            false,
+            "Successfully deleted comment"
+        );
     } catch(error) {
-        console.log("Error while deleting comment: ", error);
-        return {
-            errorMessage: 'Error while deleting comment',
-            status:400,
-        }
+        throw error;
     }
 }
 
 
-export const getCommentCardId = async (commentId) => {
+export const getCommentCardId = async (commentId:string) => {
     try {
         const commentIdResult = await Comment.findOne({
             attributes: ['card_id'],
@@ -112,22 +119,25 @@ export const getCommentCardId = async (commentId) => {
             }
         });
         if(!commentIdResult) {
-            return {
-                errorMessage: 'No comment with the given id exists',
-                status: 400
-            }
+            return generateServiceResponse(
+                400,
+                true,
+                'No comment with the given id exists'
+            );
         }
-        return commentIdResult;
+
+        return generateServiceResponse(
+            200,
+            false,
+            "Successfully fethced comment",
+            commentIdResult.dataValues
+        );
     } catch(error) {
-        console.log("Error while card id of comment: ", error);
-        return {
-            errorMessage: 'Error while card id of comment',
-            status:400,
-        }
+        throw error;
     }
 }
 
-export const checkIfCommentCreator = async (commentId, userId) => {
+export const checkIfCommentCreator = async (commentId:string, userId:string) => {
     try {   
         const checkIfCommentCreatorResult:any = await Comment.findOne({
             attributes: ['created_by'],
@@ -137,26 +147,22 @@ export const checkIfCommentCreator = async (commentId, userId) => {
         });
     
         if(!checkIfCommentCreatorResult) {
-            return  {
-                errorMessage: 'No attachemnt with the given id exists',
-                status: 400
-            };
+            return generateServiceResponse(
+                400,
+                true,
+                'No comment with the given id exists'
+            )
         }
-    
-        if(checkIfCommentCreatorResult.created_by === userId) {
-            return checkIfCommentCreatorResult;
-        } else {
-            return  {
-                errorMessage: 'You don\'t have permission to take this action',
-                status: 400
+
+        return generateServiceResponse(
+            200,
+            false,
+            checkIfCommentCreatorResult.created_by === userId ? "User is the creator of comment" : "User is not the creator of comment",
+            {
+                isCreator: checkIfCommentCreatorResult.created_by === userId
             }
-        }
+        );
     } catch(error) {
-        console.log('Error while checking  comment creator',error);
-        return {
-            errorMessage: 'Something went wrong',
-            status: 400
-        };
+        throw error;
     }
-    
 }

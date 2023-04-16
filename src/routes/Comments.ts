@@ -1,45 +1,41 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import {generateAPIResponse} from '../common/helper.js';
 import { createCommentOnCard, getCommentsOfCard, updateCommentOfCard, deleteCommentOfCard } from '../controllers/Comments.js';
 
 const commentsRouter = express.Router();
 
-commentsRouter.get('/list/:card_id', async (req, res) => {
+commentsRouter.get('/list/:card_id', async (req:Request, res:Response) => {
     try {   
-        const [status, response] = await getCommentsOfCard(req);
+        const {status, response} = await getCommentsOfCard(req);
         res.status(status).json(response);
     } catch(error) {
-        console.log(error);
         res.status(500).json(generateAPIResponse('Something went wrong'));
     }
 });
 
-commentsRouter.post('/', async (req, res) => {
+commentsRouter.post('/', async (req:Request, res:Response) => {
     try {
-        const [status, response] = await createCommentOnCard(req);
+        const {status, response} = await createCommentOnCard(req);
         res.status(status).json(response);
     } catch(error) {
-        console.log(error);
         res.status(500).json(generateAPIResponse('Something went wrong'));
     }
 });
 
-commentsRouter.put('/:comment_id', async(req, res) => {
+commentsRouter.put('/:comment_id', async(req:Request, res:Response) => {
     try {
-        const [status, response] = await updateCommentOfCard(req);
+        const {status, response} = await updateCommentOfCard(req);
         res.status(status).json(response);
     } catch(error) {
-        console.log(error);
         res.status(500).json(generateAPIResponse('Something went wrong'));
     }
 });
 
-commentsRouter.delete('/:comment_id', async (req, res) => {
+commentsRouter.delete('/:comment_id', async (req:Request, res:Response) => {
     try {
-        const [status, response] = await deleteCommentOfCard(req)
+        const {status, response} = await deleteCommentOfCard(req)
         res.status(status).json(response);
     } catch(error) {
-        console.log(error);
         res.status(500).json(generateAPIResponse('Something went wrong'));
     }
 });

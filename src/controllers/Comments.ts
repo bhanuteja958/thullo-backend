@@ -1,105 +1,142 @@
+import { Request } from "express";
 import { generateAPIResponse, checkIfUserIsBoardMember } from "../common/helper.js";
+import { APIResponse, ServiceResponse } from "../common/types.js";
 import { createComment, updateComment, deleteComment, getComments, checkIfCommentCreator} from "../services/comments.js";
 
-export const createCommentOnCard = async (req) => {
-    let response = {};
+export const createCommentOnCard = async (req:Request) => {
+    let response:APIResponse;
     try {
-        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(req.body.card_id, 'card', req.userInfo.id);
+        const checkIfBoardMemberResult:ServiceResponse = await checkIfUserIsBoardMember(req.body.card_id, 'card', req.body.userInfo.id);
 
-        if(checkIfBoardMemberResult.errorMessage) {
-            response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
-            return [checkIfBoardMemberResult.status, response];
+        if(checkIfBoardMemberResult.isError) {
+            response = generateAPIResponse(checkIfBoardMemberResult.message);
+            return {
+                status: checkIfBoardMemberResult.status,
+                response
+            };
         }
 
-        const createCommentResult:any = await createComment(req.body, req.userInfo.id);
+        const createCommentResult:ServiceResponse = await createComment(req.body, req.body.userInfo.id);
 
-        if(createCommentResult.errorMessage) {
-            response = generateAPIResponse(createCommentResult.errorMessage);
-            return [createCommentResult.status, response];
+        if(createCommentResult.isError) {
+            response = generateAPIResponse(createCommentResult.message);
+            return {
+                status: createCommentResult.status,
+                response
+            };
         }
 
         response = generateAPIResponse('Successfully created comment', true);
-        return [201, response];
+        return {
+            status: 201,
+            response
+        };
     } catch(error) {
-        console.log(error);
+        throw error;
     }
 }
 
-export const  updateCommentOfCard = async (req) => {
-    let response = {};
+export const  updateCommentOfCard = async (req:Request) => {
+    let response:APIResponse
     try {
         const {comment_id} = req.params;
 
-        const checkIfCommentCreatorResult = await checkIfCommentCreator(comment_id, req.userInfo.id);
+        const checkIfCommentCreatorResult:ServiceResponse = await checkIfCommentCreator(comment_id, req.body.userInfo.id);
 
-        if(checkIfCommentCreatorResult.errorMessage) {
-            response = generateAPIResponse(checkIfCommentCreatorResult.errorMessage);
-            return [checkIfCommentCreatorResult.status, response];
+        if(checkIfCommentCreatorResult.isError) {
+            response = generateAPIResponse(checkIfCommentCreatorResult.message);
+            return {
+                status: checkIfCommentCreatorResult.status,
+                response
+            };
         }
 
-        const updateCommentResult:any = await updateComment(req.body, comment_id);
+        const updateCommentResult:ServiceResponse = await updateComment(req.body, comment_id);
 
-        if(updateCommentResult.errorMessage) {
-            response = generateAPIResponse(updateCommentResult.errorMessage);
-            return [updateCommentResult.status, response];
+        if(updateCommentResult.isError) {
+            response = generateAPIResponse(updateCommentResult.message);
+            return {
+                status:updateCommentResult.status,
+                response
+            };
         }
 
         response = generateAPIResponse('Successfully updated comment', true);
-        return [200, response];
-
+        return {
+            status: 200,
+            response
+        };
     } catch(error) {
-        console.log(error);
+       throw error;
     }
 }
 
-export const deleteCommentOfCard = async(req) => {
-    let response = {}
+export const deleteCommentOfCard = async(req:Request) => {
+    let response:APIResponse
     try {
         const {comment_id} = req.params;
 
-        const checkIfCommentCreatorResult = await checkIfCommentCreator(comment_id, req.userInfo.id);
+        const checkIfCommentCreatorResult:ServiceResponse = await checkIfCommentCreator(comment_id, req.body.userInfo.id);
 
-        if(checkIfCommentCreatorResult.errorMessage) {
-            response = generateAPIResponse(checkIfCommentCreatorResult.errorMessage);
-            return [checkIfCommentCreatorResult.status, response];
+        if(checkIfCommentCreatorResult.isError) {
+            response = generateAPIResponse(checkIfCommentCreatorResult.message);
+            return {
+                status: checkIfCommentCreatorResult.status,
+                response
+            };
         }
 
-        const deleteCommentResult:any = await deleteComment(comment_id);
+        const deleteCommentResult:ServiceResponse = await deleteComment(comment_id);
 
-        if(deleteCommentResult.errorMessage) {
-            response = generateAPIResponse(deleteCommentResult.errorMessage);
-            return [deleteCommentResult.status, response];
+        if(deleteCommentResult.isError) {
+            response = generateAPIResponse(deleteCommentResult.message);
+            return {
+                status: deleteCommentResult.status,
+                response
+            };
         }
 
         response = generateAPIResponse('Successfully deleted comment', true);
-        return [200, response];
+        return {
+            status: 200,
+            response
+        };
     } catch(error) {
-        console.log(error);
+       throw error;
     }
 }
 
-export const getCommentsOfCard = async(req) => {
+export const getCommentsOfCard = async(req:Request) => {
     let response = {};
     try {
         const {card_id} = req.params;
 
-        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(card_id, 'card', req.userInfo.id);
+        const checkIfBoardMemberResult:ServiceResponse = await checkIfUserIsBoardMember(card_id, 'card', req.body.userInfo.id);
 
-        if(checkIfBoardMemberResult.errorMessage) {
-            response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
-            return [checkIfBoardMemberResult.status, response];
+        if(checkIfBoardMemberResult.isError) {
+            response = generateAPIResponse(checkIfBoardMemberResult.message);
+            return {
+                status: checkIfBoardMemberResult.status,
+                response
+            };
         }
 
-        const getCommentsResult:any =await getComments(card_id);
+        const getCommentsResult:ServiceResponse =await getComments(card_id);
 
-        if(getCommentsResult.errorMessage) {
-            response = generateAPIResponse(getCommentsResult.errorMessage);
-            return [getCommentsResult.status, response];
+        if(getCommentsResult.isError) {
+            response = generateAPIResponse(getCommentsResult.message);
+            return {
+                status: getCommentsResult.status,
+                response
+            };
         }
 
         response = generateAPIResponse('Successfully fecthed comments', true, getCommentsResult);
-        return [200, response];
+        return {
+            status:200,
+            response
+        };
     } catch(error) {
-        console.log(error);
+        throw error;
     }
 }
