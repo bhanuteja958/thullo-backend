@@ -6,7 +6,7 @@
   "main": "server.ts",
   "scripts": {
     "watch": "tsc -w",
-    "dev": "nodemon server.js"
+    "dev": "nodemon ./dist/server.js"
   },
   "author": "Bhanu Teja",
   "license": "MIT",

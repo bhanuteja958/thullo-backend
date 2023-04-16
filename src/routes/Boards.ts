@@ -1,23 +1,22 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import {generateAPIResponse} from '../common/helper.js';
 import { createUserBoard, getBoardsOfUser, getBoardData, updateBoardData, deleteBoardData, addMemberToBoard, removeMemberFromBoard } from '../controllers/Boards.js';
 
 const boardsRouter = express.Router();
 
-boardsRouter.get('/', async (req, res) => {
+boardsRouter.get('/', async (req:Request, res:Response) => {
     try {
-        const [status, response] = await getBoardsOfUser(req);
+        const {status, response} = await getBoardsOfUser(req);
         res.status(status).json(response);
     } catch(error) {
-        console.log(error);
         const response = generateAPIResponse('Something went wrong')
         res.status(500).json(response);
     }
 })
 
-boardsRouter.post('/',async (req,res) => {
+boardsRouter.post('/',async (req:Request, res:Response) => {
     try{
-        const [status, response] = await createUserBoard(req);
+        const {status, response} = await createUserBoard(req);
         res.status(status).json(response);
     } catch(error) {
         console.log(error);
@@ -25,9 +24,9 @@ boardsRouter.post('/',async (req,res) => {
     }
 });
 
-boardsRouter.get('/:boardId', async (req,res) => {
+boardsRouter.get('/:boardId', async (req:Request, res:Response) => {
     try {
-        const [status, response] = await getBoardData(req);
+        const {status, response} = await getBoardData(req);
         res.status(status).json(response);
     } catch(error) {
         console.log(error);
@@ -35,9 +34,9 @@ boardsRouter.get('/:boardId', async (req,res) => {
     }
 });
 
-boardsRouter.put('/:boardId', async (req, res) => {
+boardsRouter.put('/:boardId', async (req:Request, res:Response) => {
     try {
-        const [status, response] = await updateBoardData(req);
+        const {status, response} = await updateBoardData(req);
         res.status(status).json(response);
     } catch(error) {
         console.log(error);
@@ -45,9 +44,9 @@ boardsRouter.put('/:boardId', async (req, res) => {
     }
 })
 
-boardsRouter.delete('/:boardId', async (req, res) => {
+boardsRouter.delete('/:boardId', async (req:Request, res:Response) => {
     try {
-        const [status, response] = await deleteBoardData(req);
+        const {status, response} = await deleteBoardData(req);
         res.status(status).json(response);
     } catch(error) {
         console.log(error);
@@ -55,9 +54,9 @@ boardsRouter.delete('/:boardId', async (req, res) => {
     }
 })
 
-boardsRouter.post('/addMember', async(req, res) => {
+boardsRouter.post('/addMember', async(req:Request, res:Response) => {
     try{
-        const [status, response] = await addMemberToBoard(req);
+        const {status, response} = await addMemberToBoard(req);
         res.status(status).json(response);
     } catch(error) {
         console.log(error);
@@ -65,9 +64,9 @@ boardsRouter.post('/addMember', async(req, res) => {
     }
 });
 
-boardsRouter.delete('/removeMember/:board_id/:user_id', async(req, res) => {
+boardsRouter.delete('/removeMember/:board_id/:user_id', async(req:Request, res:Response) => {
     try{
-        const [status, response] = await removeMemberFromBoard(req);
+        const {status, response} = await removeMemberFromBoard(req);
         res.status(status).json(response);
     } catch(error) {
         console.log(error);

@@ -1,187 +1,293 @@
+import { Request } from "express";
 import { generateAPIResponse, checkIfUserIsBoardMember } from "../common/helper.js";
+import { APIResponse, ServiceResponse } from "../common/types.js";
 import { createBoard, getBoards, getSingleBoard, updateSingleBoard, deleteBoard, addMember, removeMember, checkIfBoardAdmin, checkIfAlreadyMember } from "../services/board.js";
 
 
-export const createUserBoard = async (req) => {
-    let response = {};
+export const createUserBoard = async (req: Request) => {
+    let response: APIResponse;
     try {
-        req.body.userId = req.userInfo.id;
+        const {title, description, cover_photo_url, visibility} = req.body
 
-        const createBoardResult:any = await createBoard(req.body);
+        const createBoardResult:ServiceResponse = await createBoard(title, cover_photo_url, description, visibility, req.body.userInfo.id);
         
-        if(createBoardResult.errorMessage){
-            response = generateAPIResponse(createBoardResult.errorMessage);
-            return [createBoardResult.status, response];
+        if(createBoardResult.isError){
+            response = generateAPIResponse(createBoardResult.message);
+            return {
+                status: createBoardResult.status,
+                response
+            }
         }
 
         response = generateAPIResponse('Succesfully created board', true)
-        return [201, response];
+        return {
+            status: 200,
+            response
+        }
     } catch (error) {
-        console.log(error);
+        return {
+            status: 500,
+            response: generateAPIResponse(
+                error.message,
+                true,
+            )
+       }
     }
 }
 
-export const getBoardsOfUser = async (req) => {
-    let response = {}
+export const getBoardsOfUser = async (req:Request) => {
+    let response: APIResponse
     try {
-        const userId = req.userInfo.id;
+        const loggedInUserId = req.body.userInfo.id;
 
-        const getBoardsResult:any = await getBoards(userId);
+        const getBoardsResult:ServiceResponse = await getBoards(loggedInUserId);
 
-        if(getBoardsResult.errorMessage) {
-            response = generateAPIResponse(getBoardsResult.errorMessage);
-            return [getBoardsResult.status, response];
+        if(getBoardsResult.isError) {
+            response = generateAPIResponse(getBoardsResult.message);
+            return {
+                status: getBoardsResult.status,
+                response
+            }
         }
 
         response = generateAPIResponse('Successfully fetched boards', true, getBoardsResult);
-        return [200, response];
+        return {
+            status: 200,
+            response
+        }
     } catch (error) {
-        console.log(error);
+        return {
+            status: 500,
+            response: generateAPIResponse(
+                error.message,
+                true,
+            )
+       }
     }
 }
 
-export const getBoardData = async (req) => {
-    let response = {}
+export const getBoardData = async (req:Request) => {
+    let response: APIResponse
     try {
         const boardId = req.params.boardId;
-        const userId = req.userInfo.id;
+        const loggedInUserId = req.body.userInfo.id;
 
-        const checkIfBoardMemberResult:any = await checkIfUserIsBoardMember(boardId, 'board', userId);
+        const checkIfBoardMemberResult:ServiceResponse = await checkIfUserIsBoardMember(boardId, 'board', loggedInUserId);
 
-        if(checkIfBoardMemberResult.errorMessage) {
-            response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
-            return [checkIfBoardMemberResult.status, response];
+        if(checkIfBoardMemberResult.isError) {
+            response = generateAPIResponse(checkIfBoardMemberResult.message);
+            return {
+                status: checkIfBoardMemberResult.status,
+                response
+            }
         }
 
-        const boardDataResult = await getSingleBoard(boardId);
+        const boardDataResult:ServiceResponse = await getSingleBoard(boardId);
 
-        if(boardDataResult.errorMessage) {
-           response = generateAPIResponse(boardDataResult.errorMessage);
-            return [boardDataResult.status, response];
+        if(boardDataResult.isError) {
+           response = generateAPIResponse(boardDataResult.message);
+           return {
+            status: boardDataResult.status,
+            response
+           }
         }
 
         response = generateAPIResponse('Successfully feched board data', true, boardDataResult);
-        return [200, response];
+        return {
+            status: 200,
+            response
+        }
     } catch(error) {
-        console.log(error);
+        return {
+            status: 500,
+            response: generateAPIResponse(
+                error.message,
+                true,
+            )
+       }
     }
 }   
 
-export const updateBoardData = async (req) => {
-    let response = {};
+export const updateBoardData = async (req:Request) => {
+    let response :APIResponse;
     try {
         const boardId = req.params.boardId
-        const userId = req.userInfo.id;
+        const loggedInUserId = req.body.userInfo.id;
         const boardValuesToBeUpdated = req.body;
 
-        const checkIfAdminResult = await checkIfBoardAdmin(boardId, req.userInfo.id);
+        const checkIfAdminResult:ServiceResponse = await checkIfBoardAdmin(boardId, loggedInUserId);
 
-        if(checkIfAdminResult.errorMessage) {
-            response = generateAPIResponse(checkIfAdminResult.errorMessage);
-            return [checkIfAdminResult.status, response];
+        if(checkIfAdminResult.isError) {
+            response = generateAPIResponse(checkIfAdminResult.message);
+            return {
+                status: checkIfAdminResult.status,
+                response
+            }
         }
 
         //update board
-        const boardDataResult:any = await updateSingleBoard(boardId, userId, boardValuesToBeUpdated);
+        const boardDataResult:ServiceResponse = await updateSingleBoard(boardId, loggedInUserId, boardValuesToBeUpdated);
 
-        if(boardDataResult.errorMessage) {
-            response = generateAPIResponse(boardDataResult.errorMessage);
-            return [boardDataResult.status, response];
+        if(boardDataResult.isError) {
+            response = generateAPIResponse(boardDataResult.message);
+            return {
+                status: boardDataResult.status,
+                response
+            }
         }
 
         response = generateAPIResponse('Successfully updated board data', true);
-        return [200, response];
+        return {
+            status: 200,
+            response
+        }
     } catch(error) {
-        console.log(error);
+        return {
+            status: 500,
+            response: generateAPIResponse(
+                error.message,
+                true,
+            )
+       }
     }
 }
 
-export const deleteBoardData = async (req) => {
-    let response = {};
+export const deleteBoardData = async (req:Request) => {
+    let response:APIResponse;
     try {
-        const userId = req.userInfo.id;
+        const loggedInUserId = req.body.userInfo.id;
         const boardId = req.params.boardId
 
-        const checkIfAdminResult = await checkIfBoardAdmin(boardId, req.userInfo.id);
+        const checkIfAdminResult:ServiceResponse = await checkIfBoardAdmin(boardId, loggedInUserId);
 
-        if(checkIfAdminResult.errorMessage) {
-            response = generateAPIResponse(checkIfAdminResult.errorMessage);
-            return [checkIfAdminResult.status, response];
+        if(checkIfAdminResult.isError) {
+            response = generateAPIResponse(checkIfAdminResult.message);
+            return {
+                status: checkIfAdminResult.status,
+                response
+            }
         }
 
         //delete board
-        const deleteBoardResult:any = await deleteBoard(boardId, userId);
+        const deleteBoardResult:ServiceResponse = await deleteBoard(boardId, loggedInUserId);
 
-        if(deleteBoardResult.errorMessage) {
-            response = generateAPIResponse(deleteBoardResult.errorMessage);
-            return [deleteBoardResult.status, response];
+        if(deleteBoardResult.isError) {
+            response = generateAPIResponse(deleteBoardResult.message);
+            return {
+                status: deleteBoardResult.status,
+                response
+            }
         }
 
         response = generateAPIResponse("Successfully deleted board");
-        return [200, response];
+        return {
+            status: 200, 
+            response
+        }
 
     } catch(error) {
-        console.log(error);
+        return {
+            status: 500,
+            response: generateAPIResponse(
+                error.message,
+                true,
+            )
+       }
     }   
 }
 
-export const addMemberToBoard = async (req) => {
-    let response = {}
+export const addMemberToBoard = async (req:Request) => {
+    let response: APIResponse
     try {
         const {board_id, user_id} = req.body;
+        const loggedInUserId = req.body.userInfo.id
 
-        const checkIfAdminResult = await checkIfBoardAdmin(board_id, req.userInfo.id);
+        const checkIfAdminResult = await checkIfBoardAdmin(board_id, loggedInUserId);
 
-        if(checkIfAdminResult.errorMessage) {
-            response = generateAPIResponse(checkIfAdminResult.errorMessage);
-            return [checkIfAdminResult.status, response];
+        if(checkIfAdminResult.isError) {
+            response = generateAPIResponse(checkIfAdminResult.message);
+            return {
+                status: checkIfAdminResult.status,
+                response
+            }
         }
 
-        const checkIfAlreadyMemberResult:any = await checkIfAlreadyMember(board_id, user_id);
+        const checkIfAlreadyMemberResult:ServiceResponse = await checkIfAlreadyMember(board_id, user_id);
 
-        if(checkIfAlreadyMemberResult.errorMessage) {
-            response = generateAPIResponse(checkIfAlreadyMemberResult.errorMessage);
-            return [checkIfAlreadyMemberResult.status, response];
+        if(checkIfAlreadyMemberResult.isError) {
+            response = generateAPIResponse(checkIfAlreadyMemberResult.message);
+            return {
+                status: checkIfAlreadyMemberResult.status,
+                response
+            }
         }
 
-        const addMemberResult:any = await addMember(board_id, user_id);
+        const addMemberResult:ServiceResponse = await addMember(board_id, user_id);
 
-        if(addMemberResult.errorMessage) {
-        response = generateAPIResponse(addMemberResult.errorMessage)
-        return [addMemberResult.status, response];
+        if(addMemberResult.isError) {
+            response = generateAPIResponse(addMemberResult.message);
+            return {
+                status: addMemberResult.status,
+                response
+            }
         }
 
         response = generateAPIResponse('Successfully added user to the board', true);
-        return [201, response];
+        return {
+            status: 201,
+            response
+        }
     } catch(error) {
-        console.log(error);
+        return {
+            status: 500,
+            response: generateAPIResponse(
+                error.message,
+                true,
+            )
+       }
     }
 }
 
 
-export const removeMemberFromBoard = async (req) => {
-    let response = {}
+export const removeMemberFromBoard = async (req:Request) => {
+    let response:APIResponse
     try {
 
         const {board_id, user_id} = req.params;
+        const loggedInUserId = req.body.userInfo.id
 
-        const checkIfAdminResult = await checkIfBoardAdmin(board_id, req.userInfo.id);
+        const checkIfAdminResult:ServiceResponse = await checkIfBoardAdmin(board_id,loggedInUserId);
 
-        if(checkIfAdminResult.errorMessage) {
-            response = generateAPIResponse(checkIfAdminResult.errorMessage);
-            return [checkIfAdminResult.status, response];
+        if(checkIfAdminResult.isError) {
+            response = generateAPIResponse(checkIfAdminResult.message);
+            return {
+                status:checkIfAdminResult.status,
+                response
+            }
         }
 
-        const removeMemberResult:any = await removeMember(board_id, user_id);
+        const removeMemberResult:ServiceResponse = await removeMember(board_id, user_id);
 
-        if(removeMemberResult.errorMessage) {
-            response = generateAPIResponse(removeMemberResult.errorMessage);
-            return [removeMemberResult.status, response];
+        if(removeMemberResult.isError) {
+            response = generateAPIResponse(removeMemberResult.message);
+            return {
+                status: removeMemberResult.status,
+                response
+            }
         }
 
         response = generateAPIResponse('Succesfully removed user from the board', true)
-        return [200, response];
+        return {
+            status: 200,
+            response
+        }
     } catch(error) {
-
+        return {
+            status: 500,
+            response: generateAPIResponse(
+                error.message,
+                true,
+            )
+       }
     }
 }
