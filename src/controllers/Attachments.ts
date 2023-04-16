@@ -1,102 +1,140 @@
+import { Request } from "express";
 import { generateAPIResponse, checkIfUserIsBoardMember } from "../common/helper.js";
+import { APIResponse, ServiceResponse } from "../common/types.js";
 import { createAttachment, updateAttachment, deleteAttachment, getAttachments, checkIfAttachmentCreator } from "../services/attachments.js";
 
-export const createAttachmentForCard = async (req) => {
-    let response = {};
+export const createAttachmentForCard = async (req:Request) => {
+    let response:APIResponse;
     try {
-        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(req.body.card_id, 'card', req.userInfo.id);
+        const checkIfBoardMemberResult:ServiceResponse = await checkIfUserIsBoardMember(req.body.card_id, 'card', req.body.userInfo.id);
 
-        if(checkIfBoardMemberResult.errorMessage) {
-            response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
-            return [checkIfBoardMemberResult.status, response];
+        if(checkIfBoardMemberResult.isError) {
+            response = generateAPIResponse(checkIfBoardMemberResult.message);
+            return {
+                status: checkIfBoardMemberResult.status,
+                response
+            };
         }
 
-        const createAttachementResult:any = await createAttachment(req.body, req.userInfo.id);
+        const createAttachementResult:ServiceResponse = await createAttachment(req.body, req.body.userInfo.id);
 
-        if(createAttachementResult.errorMessage) {
-            response = generateAPIResponse(createAttachementResult.errorMessage);
-            return [createAttachementResult.status, response];
+        if(createAttachementResult.isError) {
+            response = generateAPIResponse(createAttachementResult.message);
+            return {
+                status: createAttachementResult.status,
+                response
+            };
         }
 
         response = generateAPIResponse("Successfully created attachementForCard", true);
-        return [201, response]
+        return {
+            status: 201,
+            response
+        };
     } catch(error) {
-        console.log(error);
+        throw error;
     }
 };
 
-export const updateAttachmentOfCard = async(req) => {
-    let response = {};
+export const updateAttachmentOfCard = async(req:Request) => {
+    let response:APIResponse
     try {
         const {attachmentId} = req.params;
-        const checkIfAttachmentCreatorResult:any = await checkIfAttachmentCreator(attachmentId, req.userInfo.id);
+        const checkIfAttachmentCreatorResult:ServiceResponse = await checkIfAttachmentCreator(attachmentId, req.body.userInfo.id);
 
-        if(checkIfAttachmentCreatorResult.errorMessage) {
-            response = generateAPIResponse(checkIfAttachmentCreatorResult.errorMessage);
-            return [checkIfAttachmentCreatorResult.status, response];
+        if(checkIfAttachmentCreatorResult.isError) {
+            response = generateAPIResponse(checkIfAttachmentCreatorResult.message);
+            return {
+                status: checkIfAttachmentCreatorResult.status,
+                response
+            };
         }
 
-        const updateAttachmentResult:any = await updateAttachment(req.body, attachmentId);
+        const updateAttachmentResult:ServiceResponse = await updateAttachment(req.body, attachmentId);
 
-        if(updateAttachmentResult.errorMessage) {
-            response = generateAPIResponse(updateAttachmentResult.errorMessage);
-            return [updateAttachmentResult.status, response];
+        if(updateAttachmentResult.isError) {
+            response = generateAPIResponse(updateAttachmentResult.message);
+            return {
+                status: updateAttachmentResult.status,
+                response
+            };
         }
 
         response = generateAPIResponse("Successfully updated attachement of Card", true);
-        return [200, response]
+        return {
+            status: 200,
+            response
+        }
     } catch(error) {
-        console.log(error);
+        throw error;
     }
 }
 
-export const getAttachmentsOfCard = async (req) => {
-    let response = {};
+export const getAttachmentsOfCard = async (req:Request) => {
+    let response:APIResponse;
     try {
         const {cardId} = req.params;
-        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(cardId, 'card', req.userInfo.id);
+        const checkIfBoardMemberResult:ServiceResponse = await checkIfUserIsBoardMember(cardId, 'card', req.body.userInfo.id);
 
-        if(checkIfBoardMemberResult.errorMessage) {
-            response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
-            return [checkIfBoardMemberResult.status, response];
+        if(checkIfBoardMemberResult.isError) {
+            response = generateAPIResponse(checkIfBoardMemberResult.message);
+            return {
+                status: checkIfBoardMemberResult.status,
+                response
+            };
         }
 
-        const getAttachmentsResult:any = await getAttachments(cardId);
+        const getAttachmentsResult:ServiceResponse = await getAttachments(cardId);
 
-        if(getAttachmentsResult.errorMessage) {
-            response = generateAPIResponse(getAttachmentsResult.errorMessage);
-            return [getAttachmentsResult.status, response];
+        if(getAttachmentsResult.isError) {
+            response = generateAPIResponse(getAttachmentsResult.message);
+            return {
+                status: getAttachmentsResult.status,
+                response
+            };
         }
 
         response = generateAPIResponse('Successfully fetched attachements', true, getAttachmentsResult);
-        return [200, response];
+        return {
+            status: 200,
+            response
+        };
     } catch(error) {
-        console.log(error);
+        throw error;
     }
 }
 
-export const deleteAttachmentOfCard = async (req) => {
-    let response = {}
+export const deleteAttachmentOfCard = async (req:Request) => {
+    let response:APIResponse;
     try {
         const {attachmentId} = req.params;
         
-        const checkIfAttachmentCreatorResult = await checkIfAttachmentCreator(attachmentId, req.userInfo.id);
+        const checkIfAttachmentCreatorResult = await checkIfAttachmentCreator(attachmentId, req.body.userInfo.id);
 
-        if(checkIfAttachmentCreatorResult.errorMessage) {
-            response = generateAPIResponse(checkIfAttachmentCreatorResult.errorMessage);
-            return [checkIfAttachmentCreatorResult.status, response];
+        if(checkIfAttachmentCreatorResult.isError) {
+            response = generateAPIResponse(checkIfAttachmentCreatorResult.message);
+            return {
+                status: checkIfAttachmentCreatorResult.status,
+                response
+            };
         }
 
-        const deleteAttachmentResult:any = await deleteAttachment(attachmentId);
+        const deleteAttachmentResult:ServiceResponse = await deleteAttachment(attachmentId);
 
-        if(deleteAttachmentResult.errorMessage) {
-            response = generateAPIResponse(deleteAttachmentResult.errorMessage);
-            return [deleteAttachmentResult.status, response];
+        if(deleteAttachmentResult.isError) {
+            response = generateAPIResponse(deleteAttachmentResult.message);
+            return {
+                status: deleteAttachmentResult.status,
+                response
+            };
         }
 
         response = generateAPIResponse('Successfully deleted attachment of card', true);
-        return [200, response];
+        return {
+            status: 200,
+            response
+        };
     } catch(error) {
-        console.log(error);
+        throw error;
     }
 }

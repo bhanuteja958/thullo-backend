@@ -1,23 +1,24 @@
+import { generateServiceResponse } from "../common/helper.js";
 import { Attachment } from "../models/Attachment.model.js";
 
-export const createAttachment = async (attachmentData, userId) => {
+export const createAttachment = async (attachmentData:any, userId:string) => {
     try {
         const createAttachmentResult = await Attachment.create({
             ...attachmentData,
             created_by: userId
         });
         
-        return createAttachmentResult;
+        return generateServiceResponse(
+            200,
+            false,
+            "Sucessfully created attachment"
+        )
     } catch(error) {
-        console.log('Error while creatng attachment : ', error);
-        return {
-            errorMessage: 'Error while creating attachment',
-            status: 400
-        }
+        throw error;
     }
 }
 
-export const updateAttachment = async (attachementDataToBeUpdated, attachmentId) => {
+export const updateAttachment = async (attachementDataToBeUpdated:any, attachmentId:string) => {
     try {
         const updateAttachmentResult = await Attachment.update({
             ...attachementDataToBeUpdated
@@ -28,23 +29,24 @@ export const updateAttachment = async (attachementDataToBeUpdated, attachmentId)
         });
 
         if(updateAttachmentResult[0] === 0) {
-            return {
-                errorMessage: 'No attachment with the given id exists',
-                status: 400
-            }
+            return generateServiceResponse(
+                400,
+                true,
+                'No attachment with the given id exists'
+            )
         }
 
-        return updateAttachmentResult
+        return generateServiceResponse(
+            200,
+            false,
+            "Succesfully updated attachment"
+        );
     } catch(error) {
-        console.log('Error while updating attachment : ', error);
-        return {
-            errorMessage: 'Error while updating attachment',
-            status: 400
-        }
+        throw error;
     }
 }
 
-export const getAttachments = async (cardId) => {
+export const getAttachments = async (cardId:string) => {
     try {
         const getAttachmentsResult = await Attachment.findAll({
             attributes: ['id','card_id','created_by', 'attachment_url', 'created_on'],
@@ -53,22 +55,25 @@ export const getAttachments = async (cardId) => {
             }
         });
         if(!getAttachmentsResult) {
-            return {
-                errorMessage: 'No attachments exist for the ',
-                status: 400
-            };
+            return generateServiceResponse(
+                400,
+                false,
+                'No attachments exists for the given card'
+            )
         }
-        return getAttachmentsResult;
+
+        return generateServiceResponse(
+            200,
+            true,
+            "Successfully fetched attachments",
+            getAttachmentsResult
+        );
     } catch(error) {
-        console.log('Error while fetching attachments : ', error);
-        return {
-            errorMessage: 'Error while fetching attachments',
-            status: 400
-        }
+        throw error;
     }
 }
 
-export const deleteAttachment = async (attachmentId) => {
+export const deleteAttachment = async (attachmentId:string) => {
     try {   
         const deleteAttachmentResult = await Attachment.destroy({
             where: {
@@ -77,19 +82,20 @@ export const deleteAttachment = async (attachmentId) => {
         });
 
         if(deleteAttachmentResult === 0) {
-            return {
-                errorMessage: 'No attachemnt with the given id exists',
-                status: 400
-            }
+            return generateServiceResponse(
+                400,
+                true,
+                'No attachemnt with the given id exists'
+            );
         }
 
-        return deleteAttachmentResult;
+        return generateServiceResponse(
+            200,
+            false,
+            "Sucessfully deleted attachment"
+        )
     } catch(error) {
-        console.log('Error while deleting attachment : ', error);
-        return {
-            errorMessage: 'Error while deleting attachment',
-            status: 400
-        }
+        throw error;
     }
 }
 
@@ -102,22 +108,24 @@ export const getAttachmentCardId = async (attachmentId) => {
             }
         });
         if(!attachmentIdResult) {
-            return {
-                errorMessage: 'No attachment with the given id exists',
-                status: 400
-            }
+            return generateServiceResponse(
+                400,
+                true,
+                'No attachment with the given id exists',
+            )
         }
-        return attachmentIdResult;
+        return generateServiceResponse(
+            200,
+            true,
+            "Sucessfully fetched attachment card id",
+            attachmentIdResult.dataValues.card_id
+        );
     } catch(error) {
-        console.log("Error while card id of attachment: ", error);
-        return {
-            errorMessage: 'Error while card id of attachment',
-            status:400,
-        }
+        throw error;
     }
 }
 
-export const checkIfAttachmentCreator = async (attachementId, userId) => {
+export const checkIfAttachmentCreator = async (attachementId:string, userId:string) => {
     try {
         const checkIfAttachmentCreatorResult:any = await Attachment.findOne({
             attributes: ['created_by'],
@@ -127,26 +135,23 @@ export const checkIfAttachmentCreator = async (attachementId, userId) => {
         });
     
         if(!checkIfAttachmentCreatorResult) {
-            return  {
-                errorMessage: 'No attachemnt with the given id exists',
-                status: 400
-            };
+            return generateServiceResponse(
+                400,
+                true,
+                'No attachemnt with the given id exists'
+            )
         }
-    
-        if(checkIfAttachmentCreatorResult.created_by === userId) {
-            return checkIfAttachmentCreatorResult;
-        } else {
-            return  {
-                errorMessage: 'You don\'t have permission to take this action',
-                status: 400
+
+        return generateServiceResponse(
+            200,
+            false,
+            checkIfAttachmentCreatorResult.created_by === userId ? 'User is the creator of attachment' : 'User is not the creator of attachment',
+            {
+                isCreator: checkIfAttachmentCreatorResult.created_by === userId
             }
-        }
+        );
     } catch(error) {
-        console.log('Error while checking attachment creator',error);
-        return {
-            errorMessage: 'Something went wrong',
-            status: 400
-        };
+       throw error;
     }
     
 }
