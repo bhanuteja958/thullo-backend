@@ -1,25 +1,26 @@
+import { generateServiceResponse } from "../common/helper.js";
 import { Label } from "../models/Label.model.js";
 
 
-export const createLabel = async (labelData, userId) => {
+export const createLabel = async (labelData:any, userId:string) => {
     try {
         const createLabelResult = await Label.create({
             ...labelData,
             created_by: userId,
         });
 
-        return createLabelResult;
+        return generateServiceResponse(
+            200,
+            false,
+            "Successfully created label"
+        );
     } catch(error) {
-        console.log('Error while creating label : ', error);
-        return {
-            errorMessage: 'Error while creating label',
-            status: 400
-        }
+        throw error;
     }
 }
 
 
-export const updateLabel = async (labelDataToBeUpdated, labelId) => {
+export const updateLabel = async (labelDataToBeUpdated:any, labelId:string) => {
     try {
         const updateLabelResult = await Label.update({
             ...labelDataToBeUpdated,
@@ -30,23 +31,25 @@ export const updateLabel = async (labelDataToBeUpdated, labelId) => {
         });
 
         if(updateLabelResult[0] === 0) {
-            return {
-                errorMessage: 'No label with the given id exists',
-                status: 400
-            }
+            return generateServiceResponse(
+                400,
+                true,
+                'No label with the given id exists'
+            );
         }
-        return updateLabelResult;
+
+        return generateServiceResponse(
+            200,
+            false,
+            "Successfully updated label"
+        );
     } catch(error) {
-        console.log('Error while upating label : ', error);
-        return {
-            errorMessage: 'Error while updating label',
-            status: 400
-        }
+       throw error;
     }
 }
 
 
-export const getLabels = (cardId) => {
+export const getLabels = (cardId:string) => {
     try {
         const getLabelsResult = Label.findAll({
             attributes: ['id','name','color'],
@@ -56,24 +59,26 @@ export const getLabels = (cardId) => {
         });
 
         if(!getLabelsResult) {
-            return {
-                errorMessage: 'No labels for the given card id',
-                status: 400
-            }
+            return generateServiceResponse(
+                400,
+                true,
+                'No labels exist  for the given card id'
+            );
         }
 
-        return getLabelsResult
+        return generateServiceResponse(
+            200,
+            false,
+            "Sucessfully fetched labels",
+            getLabelsResult
+        );
     } catch(error) {
-        console.log('Error while upating label : ', error);
-        return {
-            errorMessage: 'Error while updating label',
-            status: 400
-        }
+        throw error;
     }
 }
 
 
-export const deleteLabel = (labelId) => {
+export const deleteLabel = (labelId:string) => {
     try {
         const deleteLabelResult:any = Label.destroy({
             where: {
@@ -82,24 +87,25 @@ export const deleteLabel = (labelId) => {
         });
 
         if(deleteLabelResult === 0) {
-            return {
-                errorMessage: "No label with the given id exists",
-                status: 400
-            };
+            return generateServiceResponse(
+                400,
+                true,
+                "No label with the given id exists"
+            );
         }
 
-        return deleteLabelResult;
+        return generateServiceResponse(
+            200,
+            false,
+            "Sucesssfully deleted label"
+        );
     } catch(error) {
-        console.log('Error while upating label : ', error);
-        return {
-            errorMessage: 'Error while updating label',
-            status: 400
-        }
+       throw error;
     }
 }
 
 
-export const getLabelCardId = async (labelId) => {
+export const getLabelCardId = async (labelId:string) => {
     try {
         const labelIdResult = await Label.findOne({
             attributes: ['card_id'],
@@ -108,23 +114,26 @@ export const getLabelCardId = async (labelId) => {
             }
         });
         if(!labelIdResult) {
-            return {
-                errorMessage: 'No label with the given id exists',
-                status: 400
-            }
+            return generateServiceResponse(
+                400,
+                true,
+                'No label with the given id exists'
+            );
         }
-        return labelIdResult;
+
+        return generateServiceResponse(
+            200,
+            false,
+            "Sucessfully fetched label",
+            labelIdResult.dataValues
+        )
     } catch(error) {
-        console.log("Error while card id of label: ", error);
-        return {
-            errorMessage: 'Error while card id of label',
-            status:400,
-        }
+        throw error;
     }
 }
 
 
-export const checkIfLabelCreator = async (labelId, userId) => {
+export const checkIfLabelCreator = async (labelId:string, userId:string) => {
     try {
         const checkIfLabelCreatorResult:any = await Label.findOne({
             attributes: ['created_by'],
@@ -134,26 +143,23 @@ export const checkIfLabelCreator = async (labelId, userId) => {
         });
     
         if(!checkIfLabelCreatorResult) {
-            return  {
-                errorMessage: 'No label with the given id exists',
-                status: 400
-            };
+            return generateServiceResponse(
+                400,
+                true,
+                'No label with the given id exists'
+            );
         }
-    
-        if(checkIfLabelCreatorResult.created_by === userId) {
-            return checkIfLabelCreatorResult;
-        } else {
-            return  {
-                errorMessage: 'You don\'t have permission to take this action',
-                status: 400
+
+        return generateServiceResponse(
+            200,
+            false,
+            checkIfLabelCreatorResult.created_by === userId ? 'User is the creator of label' : 'User is not the creator of the label',
+            {
+                isCreator: checkIfLabelCreatorResult.created_by === userId
             }
-        }
+        );
     } catch(error) {
-        console.log('Error while checking label creator',error);
-        return {
-            errorMessage: 'Something went wrong',
-            status: 400
-        };
+        throw error;
     }
     
 }

@@ -1,102 +1,140 @@
+import { Request } from "express";
 import { generateAPIResponse, checkIfUserIsBoardMember } from "../common/helper.js";
+import { APIResponse, ServiceResponse } from "../common/types.js";
 import { createLabel, updateLabel, getLabels, deleteLabel, checkIfLabelCreator} from "../services/labels.js";
 
-export const createLabelForCard = async (req) => {
-    let response = {};
+export const createLabelForCard = async (req:Request) => {
+    let response:APIResponse
     try {
-        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(req.body.card_id, 'card', req.userInfo.id);
+        const checkIfBoardMemberResult:ServiceResponse = await checkIfUserIsBoardMember(req.body.card_id, 'card', req.body.userInfo.id);
 
-        if(checkIfBoardMemberResult.errorMessage) {
-            response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
-            return [checkIfBoardMemberResult.status, response];
+        if(checkIfBoardMemberResult.isError) {
+            response = generateAPIResponse(checkIfBoardMemberResult.message);
+            return {
+                status: checkIfBoardMemberResult.status,
+                response
+            };
         }
 
-        const createLabelResult:any = await createLabel(req.body, req.userInfo.id);
+        const createLabelResult:ServiceResponse = await createLabel(req.body, req.body.userInfo.id);
 
-        if(createLabelResult.errorMessage) {
-            response = generateAPIResponse(createLabelResult.errorMessage);
-            return [createLabelResult.status, response];
+        if(createLabelResult.isError) {
+            response = generateAPIResponse(createLabelResult.message);
+            return {
+                status: createLabelResult.status,
+                response
+            };
         }
 
         response = generateAPIResponse("Successfully created label for Card", true);
-        return [201, response]
+        return {
+            status: 201,
+            response
+        };
     } catch(error) {
-        console.log(error);
+        throw error;
     }
 };
 
-export const updateLabelOfCard = async(req) => {
-    let response = {};
+export const updateLabelOfCard = async(req:Request) => {
+    let response:APIResponse;
     try {
         const {labelId} = req.params;
 
-        const checkIfLabelCreatorResult = await checkIfLabelCreator(labelId, req.userInfo.id);
+        const checkIfLabelCreatorResult:ServiceResponse = await checkIfLabelCreator(labelId, req.body.userInfo.id);
 
-        if(checkIfLabelCreatorResult.errorMessage) {
-            response = generateAPIResponse(checkIfLabelCreatorResult.errorMessage);
-            return [checkIfLabelCreatorResult.status, response];
+        if(checkIfLabelCreatorResult.isError) {
+            response = generateAPIResponse(checkIfLabelCreatorResult.message);
+            return {
+                status: checkIfLabelCreatorResult.status,
+                response
+            };
         }
 
-        const updateLabelResult:any = await updateLabel(req.body, labelId);
+        const updateLabelResult:ServiceResponse = await updateLabel(req.body, labelId);
 
-        if(updateLabelResult.errorMessage) {
-            response = generateAPIResponse(updateLabelResult.errorMessage);
-            return [updateLabelResult.status, response];
+        if(updateLabelResult.isError) {
+            response = generateAPIResponse(updateLabelResult.message);
+            return {
+                status: updateLabelResult.status,
+                response
+            };
         }
 
         response = generateAPIResponse("Successfully updated label of Card", true)
-        return [200, response]
+        return {
+            status: 200,
+            response
+        };
     } catch(error) {
-        console.log(error);
+        throw error;
     }
 }
 
-export const getLabelsOfCard = async (req) => {
-    let response = {};
+export const getLabelsOfCard = async (req:Request) => {
+    let response:APIResponse;
     try {
         const {cardId} = req.params;
-        const checkIfBoardMemberResult = await checkIfUserIsBoardMember(cardId, 'card', req.userInfo.id);
+        const checkIfBoardMemberResult:ServiceResponse = await checkIfUserIsBoardMember(cardId, 'card', req.body.userInfo.id);
 
-        if(checkIfBoardMemberResult.errorMessage) {
-            response = generateAPIResponse(checkIfBoardMemberResult.errorMessage);
-            return [checkIfBoardMemberResult.status, response];
+        if(checkIfBoardMemberResult.isError) {
+            response = generateAPIResponse(checkIfBoardMemberResult.message);
+            return {
+                status: checkIfBoardMemberResult.status,
+                response
+            };
         }
 
-        const getLabelsResult:any = await getLabels(cardId);
+        const getLabelsResult:ServiceResponse = await getLabels(cardId);
 
-        if(getLabelsResult.errorMessage) {
-            response = generateAPIResponse(getLabelsResult.errorMessage);
-            return [getLabelsResult.status, response];
+        if(getLabelsResult.isError) {
+            response = generateAPIResponse(getLabelsResult.message);
+            return {
+                status: getLabelsResult.status,
+                response
+            };
         }
 
         response = generateAPIResponse('Successfully fetched labels', true, getLabelsResult);
-        return [200, response];
+        return {
+            status: 200,
+            response
+        };
     } catch(error) {
-        console.log(error);
+        throw error;
     }
 }
 
-export const deleteLabelOfCard = async (req) => {
-    let response = {}
+export const deleteLabelOfCard = async (req:Request) => {
+    let response:APIResponse;
     try {
         const {labelId} = req.params;
-        const checkIfLabelCreatorResult = await checkIfLabelCreator(labelId, req.userInfo.id);
+        const checkIfLabelCreatorResult:ServiceResponse = await checkIfLabelCreator(labelId, req.body.userInfo.id);
 
-        if(checkIfLabelCreatorResult.errorMessage) {
-            response = generateAPIResponse(checkIfLabelCreatorResult.errorMessage);
-            return [checkIfLabelCreatorResult.status, response];
+        if(checkIfLabelCreatorResult.isError) {
+            response = generateAPIResponse(checkIfLabelCreatorResult.message);
+            return {
+                status: checkIfLabelCreatorResult.status,
+                response
+            };
         }
         
-        const deleteLabelResult = await deleteLabel(labelId);
+        const deleteLabelResult:ServiceResponse = await deleteLabel(labelId);
 
-        if(deleteLabelResult.errorMessage) {
-            response = generateAPIResponse(deleteLabelResult.errorMessage);
-            return [deleteLabelResult.status, response];
+        if(deleteLabelResult.isError) {
+            response = generateAPIResponse(deleteLabelResult.message);
+            return {
+                status: deleteLabelResult.status,
+                response
+            };
         }
 
         response = generateAPIResponse('Successfully deleted label of card', true);
-        return [200, response];
+        return {
+            status: 200,
+            response
+        };
     } catch(error) {
-        console.log(error);
+        throw error;
     }
 }
